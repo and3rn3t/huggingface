@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Database, Cpu, Code, Book, Heart, ArrowsLeftRight, Fire } from '@phosphor-icons/react'
+import { Database, Cpu, Code, Book, Heart, ArrowsLeftRight, Fire, Trophy } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { DatasetBrowser } from '@/components/DatasetBrowser'
 import { ModelExplorer } from '@/components/ModelExplorer'
@@ -9,6 +9,8 @@ import { LearningResources } from '@/components/LearningResources'
 import { FavoritesView } from '@/components/FavoritesView'
 import { ModelComparison } from '@/components/ModelComparison'
 import { TrendingSection } from '@/components/TrendingSection'
+import { AchievementsPanel } from '@/components/AchievementsPanel'
+import { StatsWidget } from '@/components/StatsWidget'
 import { useFavorites } from '@/hooks/use-favorites'
 
 function App() {
@@ -46,21 +48,25 @@ function App() {
       <div className="relative">
         <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
           <div className="container mx-auto px-6 py-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                <Code className="text-white" size={24} weight="bold" />
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Code className="text-white" size={24} weight="bold" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">HuggingFace Playground</h1>
+                  <p className="text-sm text-muted-foreground">Explore datasets, models, and APIs</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">HuggingFace Playground</h1>
-                <p className="text-sm text-muted-foreground">Explore datasets, models, and APIs</p>
-              </div>
+              
+              <StatsWidget />
             </div>
           </div>
         </header>
 
         <main className="container mx-auto px-6 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-5xl mx-auto grid-cols-7 bg-muted/50">
+            <TabsList className="grid w-full max-w-6xl mx-auto grid-cols-8 bg-muted/50">
               <TabsTrigger value="trending" className="gap-2">
                 <Fire size={18} />
                 <span className="hidden sm:inline">Trending</span>
@@ -94,6 +100,10 @@ function App() {
                 <Book size={18} />
                 <span className="hidden sm:inline">Learn</span>
               </TabsTrigger>
+              <TabsTrigger value="achievements" className="gap-2">
+                <Trophy size={18} />
+                <span className="hidden sm:inline">Achievements</span>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="trending" className="space-y-6">
@@ -122,6 +132,10 @@ function App() {
 
             <TabsContent value="learn" className="space-y-6">
               <LearningResources />
+            </TabsContent>
+
+            <TabsContent value="achievements" className="space-y-6">
+              <AchievementsPanel />
             </TabsContent>
           </Tabs>
         </main>

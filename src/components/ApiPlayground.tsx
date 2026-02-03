@@ -18,6 +18,7 @@ import {
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
+import { useAchievements } from '@/hooks/use-achievements'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface PlaygroundTask {
@@ -157,6 +158,8 @@ export function ApiPlayground() {
 
   const [history = [], setHistory] = useKV<ExecutionHistory[]>('playground-history', [])
   const [savedPrompts = [], setSavedPrompts] = useKV<{ id: string; name: string; taskId: string; prompt: string }[]>('saved-prompts', [])
+  
+  const { trackPlaygroundRun } = useAchievements()
 
   const handleTaskChange = (taskId: string) => {
     const task = PLAYGROUND_TASKS.find(t => t.id === taskId)
@@ -267,6 +270,8 @@ export function ApiPlayground() {
       },
       ...current.slice(0, 9)
     ])
+
+    trackPlaygroundRun()
 
     toast.success('API call completed!', {
       description: `Executed in ${execTime}ms`

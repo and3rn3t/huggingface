@@ -10,6 +10,8 @@ import {
   PlayCircle, BookOpen, GraduationCap, Star, Brain
 } from '@phosphor-icons/react'
 import { useKV } from '@github/spark/hooks'
+import { useAchievements } from '@/hooks/use-achievements'
+import { StreakTracker } from '@/components/StreakTracker'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 
@@ -266,6 +268,8 @@ export function LearningResources() {
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [showExplanation, setShowExplanation] = useState(false)
+  
+  const { trackLessonComplete, trackQuizPass } = useAchievements()
 
   const currentLesson = LESSONS.find(l => l.id === selectedLesson)
   const progress = (completedLessons.length / LESSONS.length) * 100
@@ -276,17 +280,24 @@ export function LearningResources() {
     setCompletedLessons(current => {
       const lessons = current || []
       if (!lessons.includes(lessonId)) {
+        const newLessons = [...lessons, lessonId]
+        trackLessonComplete(newLessons.length)
         toast.success('Lesson completed!', {
           description: 'Keep up the great work!'
         })
-        return [...lessons, lessonId]
+        return newLessons
       }
       return lessons
     })
   }
 
   const handleQuizSubmit = (lessonId: string, correct: boolean) => {
-    setQuizScores(current => ({ ...(current || {}), [lessonId]: correct }))
+    setQuizScores(current => {
+      const newScores = { ...(current || {}), [lessonId]: correct }
+      const passedCount = Object.values(newScores).filter(Boolean).length
+      trackQuizPass(passedCount)
+      return newScores
+    })
     setShowExplanation(true)
     
     if (correct) {
@@ -326,6 +337,8 @@ export function LearningResources() {
           </Card>
         )}
       </div>
+
+      <StreakTracker />
 
       <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
         <div className="flex items-center justify-between mb-4">

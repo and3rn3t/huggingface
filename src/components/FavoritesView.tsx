@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -6,12 +6,18 @@ import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Heart, Database, Cpu, Trash, Note, NotePencil } from '@phosphor-icons/react'
 import { useFavorites } from '@/hooks/use-favorites'
+import { useAchievements } from '@/hooks/use-achievements'
 import { toast } from 'sonner'
 
 export function FavoritesView() {
   const { favorites = [], removeFavorite, updateNote, getNote } = useFavorites()
+  const { trackFavorite } = useAchievements()
   const [editingNote, setEditingNote] = useState<{ id: string; type: 'dataset' | 'model'; name: string } | null>(null)
   const [noteText, setNoteText] = useState('')
+
+  useEffect(() => {
+    trackFavorite(favorites.length)
+  }, [favorites.length, trackFavorite])
 
   const datasetFavorites = favorites.filter(fav => fav.type === 'dataset')
   const modelFavorites = favorites.filter(fav => fav.type === 'model')

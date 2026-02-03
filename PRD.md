@@ -61,6 +61,13 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Progression**: View trending overview stats → Browse trending items ranked by trend score → See growth percentages and metrics → Click items for more details
 - **Success criteria**: Users discover relevant, currently popular resources and understand what makes items trending in the community
 
+### Achievement System & Gamification
+- **Functionality**: Track user progress across all activities with achievement badges, learning streaks, and visual progress indicators; unlock achievements for completing lessons, passing quizzes, using playground, saving favorites, and maintaining daily activity streaks
+- **Purpose**: Motivate continued learning and exploration through game-like progression; provide clear goals and recognition for accomplishments; encourage daily engagement through streak mechanics
+- **Trigger**: Achievements unlock automatically based on user actions; users can view all achievements in dedicated tab; streak tracker visible in Learning section and header stats widget
+- **Progression**: Complete actions (lessons, playground runs, etc.) → Track progress toward achievements → Unlock achievement badge with celebration toast → View unlocked collection → Maintain daily streaks for streak-based achievements → See stats in header widget
+- **Success criteria**: Users understand their progress, feel motivated to unlock achievements, maintain learning streaks, and engage more frequently with the platform due to gamification elements
+
 ## Edge Case Handling
 
 - **API Rate Limits**: Display clear messaging when rate limits are approached; suggest using personal API token for extended usage
@@ -74,6 +81,9 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Comparison Limit**: Prevent adding more than 3 models to comparison; show helpful message explaining the limit
 - **No Models in Comparison**: Display encouraging empty state explaining how to add models to compare
 - **Trending Data Staleness**: Show timestamp of when trending data was last updated; handle scenarios where trending data might be unavailable
+- **Achievement Progress Reset**: Protect achievement progress from accidental deletion; provide clear information about what actions unlock which achievements
+- **Streak Breaking**: Show encouraging messages when streaks are broken; motivate users to restart their learning journey
+- **First-Time Achievement Unlocks**: Celebrate unlocking achievements with satisfying toast notifications and visual feedback
 
 ## Design Direction
 
@@ -151,7 +161,7 @@ Animations should feel responsive and data-driven, like information flowing thro
   - ArrowRight (for navigation/next actions)
   - Heart (for favorites - outlined when not favorited, filled when favorited)
   - Trash (for removing favorites)
-  - Fire (for trending section)
+  - Fire (for trending section and active streaks)
   - ArrowsLeftRight (for comparison)
   - TrendUp (for trend indicators)
   - ArrowUp (for growth indicators)
@@ -159,6 +169,15 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Plus (for adding items)
   - X (for removing/closing)
   - CheckCircle / XCircle (for accuracy indicators)
+  - Trophy (for achievements and completions)
+  - GraduationCap (for learning achievements)
+  - Brain (for quiz achievements)
+  - Flask (for experimenter achievements)
+  - Lightning (for power user achievements)
+  - Crown (for master/legendary achievements)
+  - Flame (for streak achievements)
+  - CalendarCheck (for tracking days active)
+  - Star (for favorite achievements and ratings)
 - **Spacing**: 
   - Container padding: p-6 for main content areas
   - Card padding: p-4 for compact cards, p-6 for detailed views
@@ -175,3 +194,6 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Comparison grid stacks vertically on mobile, showing one model at a time with swipe navigation
   - Trending stats cards flow in 2x2 grid on tablet, single column on mobile
   - Note editing dialog takes full screen on mobile for easier text input
+  - Achievement cards display in single column on mobile for readability
+  - Streak tracker calendar adapts to smaller size with abbreviated day names
+  - Stats widget in header collapses to icons-only on very small screens

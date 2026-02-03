@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Cpu, X, Plus, ArrowsLeftRight, CheckCircle, XCircle } from '@phosphor-icons/react'
+import { useAchievements } from '@/hooks/use-achievements'
 import { toast } from 'sonner'
 
 interface Model {
@@ -105,6 +106,13 @@ const AVAILABLE_MODELS: Model[] = [
 export function ModelComparison() {
   const [selectedModels, setSelectedModels] = useState<Model[]>([])
   const [availableModels] = useState<Model[]>(AVAILABLE_MODELS)
+  const { trackComparison } = useAchievements()
+
+  useEffect(() => {
+    if (selectedModels.length >= 2) {
+      trackComparison()
+    }
+  }, [selectedModels.length, trackComparison])
 
   const addModel = (modelId: string) => {
     if (selectedModels.length >= 3) {
