@@ -1,1 +1,81 @@
-/* This is where custom CSS goes */
+@import 'tailwindcss';
+@import "tw-animate-css";
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  
+  code, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+:root {
+  --background: oklch(0.15 0.03 265);
+  --foreground: oklch(0.95 0.01 285);
+
+  --card: oklch(0.25 0.02 265);
+  --card-foreground: oklch(0.95 0.01 285);
+
+  --popover: oklch(0.20 0.02 265);
+  --popover-foreground: oklch(0.95 0.01 285);
+
+  --primary: oklch(0.35 0.15 285);
+  --primary-foreground: oklch(0.98 0 0);
+
+  --secondary: oklch(0.88 0.08 285);
+  --secondary-foreground: oklch(0.15 0.03 265);
+
+  --muted: oklch(0.30 0.02 265);
+  --muted-foreground: oklch(0.65 0.05 285);
+
+  --accent: oklch(0.75 0.15 195);
+  --accent-foreground: oklch(0.15 0.03 265);
+
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border: oklch(0.35 0.05 265);
+  --input: oklch(0.30 0.05 265);
+  --ring: oklch(0.75 0.15 195);
+
+  --radius: 0.5rem;
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) * 1.5);
+  --radius-xl: calc(var(--radius) * 2);
+  --radius-2xl: calc(var(--radius) * 3);
+  --radius-full: 9999px;
+}

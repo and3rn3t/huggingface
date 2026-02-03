@@ -1,5 +1,108 @@
+import { useState } from 'react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Database, Cpu, Code, Book } from '@phosphor-icons/react'
+import { Toaster } from '@/components/ui/sonner'
+import { DatasetBrowser } from '@/components/DatasetBrowser'
+import { ModelExplorer } from '@/components/ModelExplorer'
+import { ApiPlayground } from '@/components/ApiPlayground'
+import { LearningResources } from '@/components/LearningResources'
+
 function App() {
-    return <div></div>
+  const [activeTab, setActiveTab] = useState('datasets')
+
+  return (
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            radial-gradient(circle at 20% 50%, oklch(0.75 0.15 195) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, oklch(0.35 0.15 285) 0%, transparent 50%),
+            radial-gradient(circle at 40% 20%, oklch(0.75 0.15 195) 0%, transparent 30%)
+          `
+        }}></div>
+        <div className="absolute inset-0" style={{
+          backgroundImage: `repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            oklch(0.35 0.15 285) 2px,
+            oklch(0.35 0.15 285) 3px
+          ), repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 2px,
+            oklch(0.35 0.15 285) 2px,
+            oklch(0.35 0.15 285) 3px
+          )`,
+          backgroundSize: '80px 80px'
+        }}></div>
+      </div>
+
+      <div className="relative">
+        <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+          <div className="container mx-auto px-6 py-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                <Code className="text-white" size={24} weight="bold" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">HuggingFace Playground</h1>
+                <p className="text-sm text-muted-foreground">Explore datasets, models, and APIs</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="container mx-auto px-6 py-8">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 bg-muted/50">
+              <TabsTrigger value="datasets" className="gap-2">
+                <Database size={18} />
+                <span className="hidden sm:inline">Datasets</span>
+              </TabsTrigger>
+              <TabsTrigger value="models" className="gap-2">
+                <Cpu size={18} />
+                <span className="hidden sm:inline">Models</span>
+              </TabsTrigger>
+              <TabsTrigger value="playground" className="gap-2">
+                <Code size={18} />
+                <span className="hidden sm:inline">Playground</span>
+              </TabsTrigger>
+              <TabsTrigger value="learn" className="gap-2">
+                <Book size={18} />
+                <span className="hidden sm:inline">Learn</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="datasets" className="space-y-6">
+              <DatasetBrowser />
+            </TabsContent>
+
+            <TabsContent value="models" className="space-y-6">
+              <ModelExplorer />
+            </TabsContent>
+
+            <TabsContent value="playground" className="space-y-6">
+              <ApiPlayground />
+            </TabsContent>
+
+            <TabsContent value="learn" className="space-y-6">
+              <LearningResources />
+            </TabsContent>
+          </Tabs>
+        </main>
+
+        <footer className="border-t border-border mt-16 py-8">
+          <div className="container mx-auto px-6 text-center text-sm text-muted-foreground">
+            <p>Educational playground for exploring HuggingFace platform features</p>
+            <p className="mt-2">Built to help you learn about datasets, models, and the Inference API</p>
+          </div>
+        </footer>
+      </div>
+
+      <Toaster />
+    </div>
+  )
 }
 
 export default App
