@@ -68,6 +68,14 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Progression**: Complete actions (lessons, playground runs, etc.) → Track progress toward achievements → Unlock achievement badge with celebration toast → View unlocked collection → Maintain daily streaks for streak-based achievements → See stats in header widget
 - **Success criteria**: Users understand their progress, feel motivated to unlock achievements, maintain learning streaks, and engage more frequently with the platform due to gamification elements
 
+### Optimized Navigation System
+- **Functionality**: Grouped, hierarchical navigation with three categories (Discover, Tools, Personal); keyboard-driven command palette (Cmd/Ctrl+K); breadcrumb trail showing current location; responsive mobile drawer menu; visual grouping with separators
+- **Purpose**: Enable faster navigation between sections, reduce cognitive load with logical grouping, provide power user shortcuts, improve mobile UX with dedicated menu, and enhance context awareness
+- **Trigger**: User clicks navigation items, uses keyboard shortcut Cmd/Ctrl+K, or opens mobile menu; breadcrumb updates automatically based on current page
+- **Progression**: Desktop: Click grouped navigation items → Active state shows accent color → Quick access via keyboard shortcut | Mobile: Tap menu icon → View grouped categories in drawer → Select destination → Menu closes automatically | All: Use Cmd/Ctrl+K → Type to search navigation → Select from filtered results
+- **Success criteria**: Users navigate between sections faster, understand where they are in the app via breadcrumbs, power users adopt keyboard shortcuts, mobile users find navigation intuitive, and overall navigation feels organized and efficient
+
+
 ## Edge Case Handling
 
 - **API Rate Limits**: Display clear messaging when rate limits are approached; suggest using personal API token for extended usage
@@ -124,6 +132,10 @@ Animations should feel responsive and data-driven, like information flowing thro
 ## Component Selection
 
 - **Components**: 
+  - Grouped navigation with visual separators for Discover, Tools, and Personal sections
+  - Command palette (Cmd/Ctrl+K) for quick navigation between sections
+  - Breadcrumb navigation for context awareness
+  - Sheet (drawer) for mobile navigation menu
   - Tabs for main navigation between Trending, Dataset Browser, Model Explorer, Compare, Favorites, API Playground, and Learn sections
   - Card components for dataset/model listings with hover states
   - Input and Select for search and filtering controls
@@ -136,6 +148,9 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Button with multiple variants (default for primary actions, outline for secondary, ghost for tertiary)
   - Textarea for API playground input fields and note editing
 - **Customizations**: 
+  - Custom navigation component with grouped sections and responsive behavior
+  - Custom command palette with keyboard shortcuts for power users
+  - Custom breadcrumb showing current location and navigation path
   - Custom dataset preview component showing sample rows in table format
   - Custom code display component with syntax highlighting and copy functionality
   - Custom stat cards showing counts and metrics for HuggingFace platform
@@ -147,7 +162,8 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Buttons: Default has gradient purple background, hover brightens with subtle lift, active slightly compresses, focus shows cyan ring
   - Cards: Default has dark slate background, hover lifts with deeper shadow and subtle purple glow, selected has cyan border accent
   - Inputs: Default dark background with muted border, focus shows cyan ring and border highlight, filled state shows subtle purple tint
-  - Tabs: Inactive tabs are muted lavender text, active tab has cyan underline accent and bright text
+  - Tabs: Inactive tabs are muted text, active tab has cyan accent background and bright text, grouped with visual separators
+  - Navigation items: Show icon + label on desktop, collapse to icons on tablet, use drawer menu on mobile
 - **Icon Selection**: 
   - Database (for datasets)
   - Cpu (for models) 
@@ -178,6 +194,9 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Flame (for streak achievements)
   - CalendarCheck (for tracking days active)
   - Star (for favorite achievements and ratings)
+  - House (for home/breadcrumb)
+  - List (for mobile menu trigger)
+  - Command (for quick nav indicator)
 - **Spacing**: 
   - Container padding: p-6 for main content areas
   - Card padding: p-4 for compact cards, p-6 for detailed views
@@ -185,7 +204,10 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Grid layouts: gap-4 for card grids
   - Consistent margin-bottom: mb-6 for section headers, mb-4 for subsections
 - **Mobile**: 
-  - Tabs convert to a horizontal scroll on mobile with snap points; consider collapsing to 2-3 visible tabs with horizontal scrolling
+  - Navigation collapses to hamburger menu with drawer on mobile, showing grouped categories
+  - Active tab shown as badge-style indicator next to menu button
+  - Breadcrumb adapts to show only current page on very small screens
+  - Command palette available on all screen sizes with touch-friendly targets
   - Card grid changes from 3 columns (desktop) → 2 columns (tablet) → 1 column (mobile)
   - Filter panel collapses into a drawer/sheet that slides up from bottom on mobile
   - Two-column layouts (sidebar + content) stack vertically on mobile
