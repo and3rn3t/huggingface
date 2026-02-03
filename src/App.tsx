@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Database, Cpu, Code, Book } from '@phosphor-icons/react'
+import { Database, Cpu, Code, Book, Heart } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { DatasetBrowser } from '@/components/DatasetBrowser'
 import { ModelExplorer } from '@/components/ModelExplorer'
 import { ApiPlayground } from '@/components/ApiPlayground'
 import { LearningResources } from '@/components/LearningResources'
+import { FavoritesView } from '@/components/FavoritesView'
+import { useFavorites } from '@/hooks/use-favorites'
 
 function App() {
   const [activeTab, setActiveTab] = useState('datasets')
+  const { favorites = [] } = useFavorites()
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -55,7 +58,7 @@ function App() {
 
         <main className="container mx-auto px-6 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 bg-muted/50">
+            <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-5 bg-muted/50">
               <TabsTrigger value="datasets" className="gap-2">
                 <Database size={18} />
                 <span className="hidden sm:inline">Datasets</span>
@@ -63,6 +66,15 @@ function App() {
               <TabsTrigger value="models" className="gap-2">
                 <Cpu size={18} />
                 <span className="hidden sm:inline">Models</span>
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="gap-2 relative">
+                <Heart size={18} weight={favorites.length > 0 ? 'fill' : 'regular'} />
+                <span className="hidden sm:inline">Favorites</span>
+                {favorites.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                    {favorites.length}
+                  </span>
+                )}
               </TabsTrigger>
               <TabsTrigger value="playground" className="gap-2">
                 <Code size={18} />
@@ -80,6 +92,10 @@ function App() {
 
             <TabsContent value="models" className="space-y-6">
               <ModelExplorer />
+            </TabsContent>
+
+            <TabsContent value="favorites" className="space-y-6">
+              <FavoritesView />
             </TabsContent>
 
             <TabsContent value="playground" className="space-y-6">

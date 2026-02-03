@@ -5,8 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { MagnifyingGlass, Cpu, Copy, Sparkle, ArrowRight } from '@phosphor-icons/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MagnifyingGlass, Cpu, Copy, Sparkle, ArrowRight, Heart } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { useFavorites } from '@/hooks/use-favorites'
 
 interface Model {
   id: string
@@ -94,6 +96,8 @@ export function ModelExplorer() {
   const [selectedTask, setSelectedTask] = useState('All Tasks')
   const [selectedFramework, setSelectedFramework] = useState('All Frameworks')
   const [selectedModel, setSelectedModel] = useState<Model | null>(null)
+  const [activeTab, setActiveTab] = useState('all')
+  const { isFavorite, toggleFavorite, getFavoritesByType } = useFavorites()
 
   const filteredModels = SAMPLE_MODELS.filter(model => {
     const matchesSearch = model.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -105,9 +109,25 @@ export function ModelExplorer() {
     return matchesSearch && matchesTask && matchesFramework
   })
 
+  const favoriteModels = SAMPLE_MODELS.filter(model => 
+    isFavorite(model.id, 'model')
+  )
+
+  const displayModels = activeTab === 'favorites' ? favoriteModels : filteredModels
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
     toast.success('Copied to clipboard!')
+  }
+
+  const handleToggleFavorite = (e: React.MouseEvent, model: Model) => {
+    e.stopPropagation()
+    toggleFavorite(model.id, 'model', model.name)
+    toast.success(
+      isFavorite(model.id, 'model') 
+        ? 'Removed from favorites' 
+        : 'Added to favorites'
+    )
   }
 
   return (
@@ -117,81 +137,116 @@ export function ModelExplorer() {
         <p className="text-muted-foreground">Discover pre-trained models for your machine learning tasks</p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
-          <Input
-            placeholder="Search models by name or task..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        <Select value={selectedTask} onValueChange={setSelectedTask}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {TASKS.map(task => (
-              <SelectItem key={task} value={task}>{task}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        <Select value={selectedFramework} onValueChange={setSelectedFramework}>
-          <SelectTrigger className="w-full md:w-[200px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FRAMEWORKS.map(framework => (
-              <SelectItem key={framework} value={framework}>{framework}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="all">All Models</TabsTrigger>
+          <TabsTrigger value="favorites" className="gap-2">
+            <Heart size={16} weight={favoriteModels.length > 0 ? 'fill' : 'regular'} />
+            Favorites {favoriteModels.length > 0 && `(${favoriteModels.length})`}
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {filteredModels.map((model) => (
-          <Card
-            key={model.id}
-            className="p-4 hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer group hover:-translate-y-1 border-border hover:border-primary/50"
-            onClick={() => setSelectedModel(model)}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Cpu className="text-accent" size={24} />
-                <h3 className="font-medium text-lg line-clamp-1">{model.name}</h3>
+        <TabsContent value={activeTab} className="space-y-4 mt-6">
+          {activeTab === 'all' && (
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+                <Input
+                  placeholder="Search models by name or task..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-10"
+                />
               </div>
-              {model.featured && <Sparkle className="text-accent flex-shrink-0" size={20} />}
+              
+              <Select value={selectedTask} onValueChange={setSelectedTask}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {TASKS.map(task => (
+                    <SelectItem key={task} value={task}>{task}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Select value={selectedFramework} onValueChange={setSelectedFramework}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FRAMEWORKS.map(framework => (
+                    <SelectItem key={framework} value={framework}>{framework}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{model.description}</p>
-            
-            <div className="flex flex-wrap gap-2 mb-3">
-              <Badge variant="secondary" className="text-xs">
-                {model.task}
-              </Badge>
-              <Badge variant="outline" className="text-xs">
-                {model.framework}
-              </Badge>
-            </div>
-            
-            <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span>{(model.downloads / 1000000).toFixed(1)}M downloads</span>
-              <span>❤️ {model.likes}</span>
-            </div>
-          </Card>
-        ))}
-      </div>
+          )}
 
-      {filteredModels.length === 0 && (
-        <div className="text-center py-12">
-          <Cpu className="mx-auto mb-4 text-muted-foreground" size={48} />
-          <h3 className="text-lg font-medium mb-2">No models found</h3>
-          <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
-        </div>
-      )}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {displayModels.map((model) => (
+              <Card
+                key={model.id}
+                className="p-4 hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer group hover:-translate-y-1 border-border hover:border-primary/50 relative"
+                onClick={() => setSelectedModel(model)}
+              >
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="absolute top-2 right-2 h-8 w-8 p-0 z-10"
+                  onClick={(e) => handleToggleFavorite(e, model)}
+                >
+                  <Heart 
+                    size={18} 
+                    weight={isFavorite(model.id, 'model') ? 'fill' : 'regular'}
+                    className={isFavorite(model.id, 'model') ? 'text-accent' : 'text-muted-foreground'}
+                  />
+                </Button>
+
+                <div className="flex items-start justify-between mb-3 pr-8">
+                  <div className="flex items-center gap-2">
+                    <Cpu className="text-accent" size={24} />
+                    <h3 className="font-medium text-lg line-clamp-1">{model.name}</h3>
+                  </div>
+                  {model.featured && <Sparkle className="text-accent flex-shrink-0" size={20} />}
+                </div>
+                
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{model.description}</p>
+                
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <Badge variant="secondary" className="text-xs">
+                    {model.task}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {model.framework}
+                  </Badge>
+                </div>
+                
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>{(model.downloads / 1000000).toFixed(1)}M downloads</span>
+                  <span>❤️ {model.likes}</span>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {displayModels.length === 0 && activeTab === 'all' && (
+            <div className="text-center py-12">
+              <Cpu className="mx-auto mb-4 text-muted-foreground" size={48} />
+              <h3 className="text-lg font-medium mb-2">No models found</h3>
+              <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
+            </div>
+          )}
+
+          {displayModels.length === 0 && activeTab === 'favorites' && (
+            <div className="text-center py-12">
+              <Heart className="mx-auto mb-4 text-muted-foreground" size={48} />
+              <h3 className="text-lg font-medium mb-2">No favorites yet</h3>
+              <p className="text-muted-foreground">Click the heart icon on any model to save it to your favorites</p>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!selectedModel} onOpenChange={() => setSelectedModel(null)}>
         <DialogContent className="max-w-2xl">

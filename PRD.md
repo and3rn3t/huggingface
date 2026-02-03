@@ -40,6 +40,13 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Progression**: Click help/info → View relevant explanation/tip → Optionally follow external link → Return to exploration
 - **Success criteria**: Users find answers to common questions and gain conceptual understanding alongside practical exploration
 
+### Favorites System
+- **Functionality**: Save and organize preferred datasets and models for quick access; view all favorites in a dedicated tab; toggle favorites with heart icon on any item
+- **Purpose**: Enable users to build a personalized collection of resources they want to reference frequently or revisit later
+- **Trigger**: User clicks heart icon on dataset/model card or navigates to Favorites tab
+- **Progression**: Click heart icon to add/remove → Item saved with timestamp → View in Favorites tab → Organized by type (datasets/models) → Remove from favorites with delete button
+- **Success criteria**: Users can easily save items, view their complete favorites collection, and manage saved items with persistence across sessions
+
 ## Edge Case Handling
 
 - **API Rate Limits**: Display clear messaging when rate limits are approached; suggest using personal API token for extended usage
@@ -48,6 +55,8 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Large Dataset Previews**: Limit sample data display to prevent performance issues; paginate or truncate with option to view more
 - **Network Errors**: Graceful fallback with cached examples and offline mode messaging; retry functionality
 - **Invalid Input**: Real-time validation with helpful hints about expected format before API submission
+- **Empty Favorites**: Show welcoming empty state with clear instructions on how to add items to favorites; encourage exploration
+- **Duplicate Favorites**: Prevent adding the same item twice; provide feedback when attempting to favorite an already-saved item
 
 ## Design Direction
 
@@ -120,6 +129,8 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Info (for help/explanations)
   - Sparkle (for featured/popular items)
   - ArrowRight (for navigation/next actions)
+  - Heart (for favorites - outlined when not favorited, filled when favorited)
+  - Trash (for removing favorites)
 - **Spacing**: 
   - Container padding: p-6 for main content areas
   - Card padding: p-4 for compact cards, p-6 for detailed views
