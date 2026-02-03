@@ -1,6 +1,17 @@
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Book, Sparkle, ArrowRight, Code, Database, Cpu } from '@phosphor-icons/react'
+import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { 
+  Book, Sparkle, ArrowRight, Code, Database, Cpu, 
+  CheckCircle, Circle, Trophy, Lightbulb, Target,
+  PlayCircle, BookOpen, GraduationCap, Star, Brain
+} from '@phosphor-icons/react'
+import { useKV } from '@github/spark/hooks'
+import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'sonner'
 
 interface Resource {
   title: string
@@ -9,6 +20,199 @@ interface Resource {
   icon: typeof Book
   link?: string
 }
+
+interface Lesson {
+  id: string
+  title: string
+  description: string
+  content: string
+  quiz?: Quiz
+  icon: typeof Book
+}
+
+interface Quiz {
+  question: string
+  options: string[]
+  correctAnswer: number
+  explanation: string
+}
+
+const LESSONS: Lesson[] = [
+  {
+    id: 'intro-hf',
+    title: 'Introduction to HuggingFace',
+    description: 'Learn the basics of the HuggingFace platform',
+    icon: Sparkle,
+    content: `HuggingFace is the leading platform for machine learning collaboration. It provides:
+
+• **Model Hub**: 130K+ pre-trained models ready to use
+• **Datasets**: 75K+ datasets for training and evaluation
+• **Spaces**: Deploy ML apps with ease
+• **Inference API**: Use models without setup
+
+The platform democratizes AI by making state-of-the-art models accessible to everyone, from beginners to researchers.`,
+    quiz: {
+      question: 'What is the primary benefit of using pre-trained models from HuggingFace?',
+      options: [
+        'They are always 100% accurate',
+        'You can use them without training from scratch',
+        'They only work with English text',
+        'They require no API token'
+      ],
+      correctAnswer: 1,
+      explanation: 'Pre-trained models save time and resources by allowing you to use or fine-tune existing models instead of training from scratch.'
+    }
+  },
+  {
+    id: 'understanding-models',
+    title: 'Understanding Model Types',
+    description: 'Explore different model architectures and their uses',
+    icon: Cpu,
+    content: `Different tasks require different model architectures:
+
+**Text Models:**
+• BERT - Best for understanding context (classification, Q&A)
+• GPT - Excels at text generation
+• T5 - Versatile for multiple tasks
+
+**Vision Models:**
+• ViT - Image classification
+• CLIP - Connects images and text
+• Stable Diffusion - Image generation
+
+**Audio Models:**
+• Whisper - Speech recognition
+• Wav2Vec - Audio understanding
+
+Choose based on your task, accuracy needs, and speed requirements.`,
+    quiz: {
+      question: 'Which model type is best suited for text generation tasks?',
+      options: ['BERT', 'GPT', 'ViT', 'CLIP'],
+      correctAnswer: 1,
+      explanation: 'GPT (Generative Pre-trained Transformer) models are specifically designed for generating coherent text.'
+    }
+  },
+  {
+    id: 'datasets-deep-dive',
+    title: 'Working with Datasets',
+    description: 'Master dataset selection and usage',
+    icon: Database,
+    content: `HuggingFace datasets are optimized for ML workflows:
+
+**Dataset Structure:**
+• Training split - For model training
+• Validation split - For tuning hyperparameters
+• Test split - For final evaluation
+
+**Popular Datasets:**
+• IMDB - Sentiment analysis (50K movie reviews)
+• SQuAD - Question answering
+• COCO - Image captioning
+• Common Voice - Speech recognition
+
+**Best Practices:**
+• Check dataset cards for bias and limitations
+• Understand the data distribution
+• Use appropriate evaluation metrics
+• Consider dataset size vs. compute resources`,
+    quiz: {
+      question: 'What is the purpose of the validation split in a dataset?',
+      options: [
+        'Final model evaluation',
+        'Training the model',
+        'Tuning hyperparameters',
+        'Data visualization'
+      ],
+      correctAnswer: 2,
+      explanation: 'The validation split is used to tune hyperparameters and make decisions during training without touching the test set.'
+    }
+  },
+  {
+    id: 'inference-api',
+    title: 'Mastering the Inference API',
+    description: 'Learn to use models via API calls',
+    icon: Code,
+    content: `The Inference API makes model usage simple:
+
+**Basic Usage:**
+\`\`\`javascript
+const response = await fetch(
+  "https://api-inference.huggingface.co/models/MODEL_ID",
+  {
+    headers: { Authorization: "Bearer YOUR_TOKEN" },
+    method: "POST",
+    body: JSON.stringify({ inputs: "Your text" })
+  }
+)
+\`\`\`
+
+**Key Concepts:**
+• Rate limits - Free tier: ~30 requests/min
+• Cold starts - First request may be slower
+• Model loading - Popular models are always ready
+• Parameters - Customize output (temperature, max_length)
+
+**Common Tasks:**
+• Text classification
+• Sentiment analysis
+• Translation
+• Question answering
+• Text generation`,
+    quiz: {
+      question: 'What might cause the first API request to a model to be slower?',
+      options: [
+        'Network congestion',
+        'Cold start - model loading',
+        'Too much input text',
+        'Wrong API token'
+      ],
+      correctAnswer: 1,
+      explanation: 'Cold starts occur when a model needs to be loaded into memory. Popular models are kept warm to avoid this.'
+    }
+  },
+  {
+    id: 'best-practices',
+    title: 'Production Best Practices',
+    description: 'Deploy ML models effectively',
+    icon: Target,
+    content: `Deploy ML models like a pro:
+
+**Performance Optimization:**
+• Use distilled models (DistilBERT) for faster inference
+• Batch requests when possible
+• Cache common queries
+• Consider model quantization
+
+**Error Handling:**
+• Handle rate limits gracefully
+• Implement retry logic with exponential backoff
+• Validate inputs before sending
+• Parse errors meaningfully
+
+**Security:**
+• Never expose API tokens in client-side code
+• Use environment variables
+• Rotate tokens regularly
+• Monitor usage for anomalies
+
+**Monitoring:**
+• Track response times
+• Log errors and edge cases
+• Monitor token usage
+• A/B test model versions`,
+    quiz: {
+      question: 'What is the main advantage of using distilled models like DistilBERT?',
+      options: [
+        'Higher accuracy',
+        'Better multilingual support',
+        'Faster inference with minimal accuracy loss',
+        'Larger context windows'
+      ],
+      correctAnswer: 2,
+      explanation: 'Distilled models are compressed versions that maintain ~95-97% of performance while being significantly faster and smaller.'
+    }
+  }
+]
 
 const RESOURCES: Resource[] = [
   {
@@ -57,30 +261,333 @@ const QUICK_TIPS = [
 ]
 
 export function LearningResources() {
+  const [completedLessons = [], setCompletedLessons] = useKV<string[]>('completed-lessons', [])
+  const [quizScores = {}, setQuizScores] = useKV<Record<string, boolean>>('quiz-scores', {})
+  const [selectedLesson, setSelectedLesson] = useState<string | null>(null)
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
+  const [showExplanation, setShowExplanation] = useState(false)
+
+  const currentLesson = LESSONS.find(l => l.id === selectedLesson)
+  const progress = (completedLessons.length / LESSONS.length) * 100
+  const totalQuizzes = LESSONS.filter(l => l.quiz).length
+  const passedQuizzes = Object.values(quizScores).filter(Boolean).length
+
+  const handleLessonComplete = (lessonId: string) => {
+    setCompletedLessons(current => {
+      const lessons = current || []
+      if (!lessons.includes(lessonId)) {
+        toast.success('Lesson completed!', {
+          description: 'Keep up the great work!'
+        })
+        return [...lessons, lessonId]
+      }
+      return lessons
+    })
+  }
+
+  const handleQuizSubmit = (lessonId: string, correct: boolean) => {
+    setQuizScores(current => ({ ...(current || {}), [lessonId]: correct }))
+    setShowExplanation(true)
+    
+    if (correct) {
+      toast.success('Correct!', {
+        description: 'You\'ve mastered this concept!'
+      })
+      handleLessonComplete(lessonId)
+    } else {
+      toast.error('Not quite right', {
+        description: 'Review the explanation and try again!'
+      })
+    }
+  }
+
+  const resetQuiz = () => {
+    setSelectedAnswer(null)
+    setShowExplanation(false)
+  }
+
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold mb-2 tracking-tight">Learning Resources</h2>
-        <p className="text-muted-foreground">Essential guides and tips for working with HuggingFace</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h2 className="text-2xl font-semibold mb-2 tracking-tight">Learning Center</h2>
+          <p className="text-muted-foreground">Master HuggingFace with interactive lessons and quizzes</p>
+        </div>
+        
+        {completedLessons.length > 0 && (
+          <Card className="p-4 bg-gradient-to-br from-accent/20 to-primary/20 border-accent/50">
+            <div className="flex items-center gap-3">
+              <Trophy className="text-accent" size={32} weight="fill" />
+              <div>
+                <div className="text-2xl font-bold">{completedLessons.length}/{LESSONS.length}</div>
+                <div className="text-xs text-muted-foreground">Lessons Completed</div>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
-        <div className="flex items-start gap-3 mb-4">
-          <Sparkle className="text-accent flex-shrink-0 mt-1" size={28} />
-          <div>
-            <h3 className="font-semibold text-lg mb-1">Quick Tips</h3>
-            <p className="text-sm text-muted-foreground">Pro tips to accelerate your learning</p>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <GraduationCap className="text-accent" size={28} weight="bold" />
+            <div>
+              <h3 className="font-semibold text-lg">Your Progress</h3>
+              <p className="text-sm text-muted-foreground">{Math.round(progress)}% complete</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-sm font-medium text-accent">{passedQuizzes}/{totalQuizzes} Quizzes Passed</div>
           </div>
         </div>
-        <ul className="space-y-2">
-          {QUICK_TIPS.map((tip, index) => (
-            <li key={index} className="flex items-start gap-2 text-sm">
-              <ArrowRight className="text-accent flex-shrink-0 mt-0.5" size={16} />
-              <span>{tip}</span>
-            </li>
-          ))}
-        </ul>
+        <Progress value={progress} className="h-2" />
       </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center gap-2">
+            <BookOpen className="text-accent" size={24} />
+            <h3 className="font-semibold text-lg">Interactive Lessons</h3>
+          </div>
+
+          <div className="space-y-3">
+            {LESSONS.map((lesson, index) => {
+              const Icon = lesson.icon
+              const isCompleted = completedLessons.includes(lesson.id)
+              const isSelected = selectedLesson === lesson.id
+              const hasQuiz = !!lesson.quiz
+              const quizPassed = quizScores[lesson.id]
+
+              return (
+                <motion.div
+                  key={lesson.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card
+                    className={`p-4 cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 ${
+                      isSelected ? 'border-accent shadow-lg shadow-accent/20' : 'border-border hover:border-accent/50'
+                    }`}
+                    onClick={() => {
+                      setSelectedLesson(isSelected ? null : lesson.id)
+                      resetQuiz()
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        isCompleted ? 'bg-accent/20' : 'bg-muted'
+                      }`}>
+                        <Icon className={isCompleted ? 'text-accent' : 'text-muted-foreground'} size={20} weight={isCompleted ? 'fill' : 'regular'} />
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium">{lesson.title}</h4>
+                          {hasQuiz && (
+                            <Brain className="text-primary" size={16} />
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{lesson.description}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {quizPassed && (
+                          <Star className="text-accent" size={20} weight="fill" />
+                        )}
+                        {isCompleted ? (
+                          <CheckCircle className="text-accent" size={24} weight="fill" />
+                        ) : (
+                          <Circle className="text-muted-foreground" size={24} />
+                        )}
+                      </div>
+                    </div>
+
+                    <AnimatePresence>
+                      {isSelected && currentLesson && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-4 pt-4 border-t border-border"
+                        >
+                          <div className="prose prose-sm max-w-none mb-4">
+                            <div className="whitespace-pre-line text-sm text-foreground leading-relaxed">
+                              {currentLesson.content}
+                            </div>
+                          </div>
+
+                          {currentLesson.quiz && (
+                            <Card className="p-4 bg-primary/5 border-primary/20">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Brain className="text-primary" size={20} weight="fill" />
+                                <h5 className="font-semibold text-sm">Knowledge Check</h5>
+                              </div>
+                              
+                              <p className="text-sm font-medium mb-3">{currentLesson.quiz.question}</p>
+                              
+                              <div className="space-y-2 mb-4">
+                                {currentLesson.quiz.options.map((option, idx) => (
+                                  <button
+                                    key={idx}
+                                    onClick={() => setSelectedAnswer(idx)}
+                                    disabled={showExplanation}
+                                    className={`w-full text-left p-3 rounded-lg border text-sm transition-all ${
+                                      selectedAnswer === idx
+                                        ? showExplanation
+                                          ? idx === currentLesson.quiz!.correctAnswer
+                                            ? 'border-accent bg-accent/10 text-accent font-medium'
+                                            : 'border-destructive bg-destructive/10 text-destructive'
+                                          : 'border-accent bg-accent/10'
+                                        : 'border-border bg-background hover:border-accent/50 hover:bg-muted'
+                                    } ${showExplanation && idx === currentLesson.quiz!.correctAnswer ? 'border-accent bg-accent/10' : ''}`}
+                                  >
+                                    {option}
+                                  </button>
+                                ))}
+                              </div>
+
+                              {showExplanation && (
+                                <motion.div
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="p-3 bg-accent/10 border border-accent/30 rounded-lg mb-3"
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <Lightbulb className="text-accent flex-shrink-0 mt-0.5" size={18} weight="fill" />
+                                    <p className="text-sm">{currentLesson.quiz.explanation}</p>
+                                  </div>
+                                </motion.div>
+                              )}
+
+                              <div className="flex gap-2">
+                                {!showExplanation ? (
+                                  <Button
+                                    onClick={() => {
+                                      if (selectedAnswer !== null) {
+                                        handleQuizSubmit(
+                                          currentLesson.id,
+                                          selectedAnswer === currentLesson.quiz!.correctAnswer
+                                        )
+                                      }
+                                    }}
+                                    disabled={selectedAnswer === null}
+                                    className="flex-1"
+                                    size="sm"
+                                  >
+                                    Submit Answer
+                                  </Button>
+                                ) : (
+                                  <>
+                                    <Button
+                                      onClick={resetQuiz}
+                                      variant="outline"
+                                      size="sm"
+                                      className="flex-1"
+                                    >
+                                      Try Again
+                                    </Button>
+                                    {!isCompleted && (
+                                      <Button
+                                        onClick={() => handleLessonComplete(currentLesson.id)}
+                                        className="flex-1"
+                                        size="sm"
+                                      >
+                                        <CheckCircle size={16} weight="fill" className="mr-1" />
+                                        Mark Complete
+                                      </Button>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </Card>
+                          )}
+
+                          {!currentLesson.quiz && !isCompleted && (
+                            <Button
+                              onClick={() => handleLessonComplete(currentLesson.id)}
+                              className="w-full mt-2"
+                              size="sm"
+                            >
+                              <CheckCircle size={16} weight="fill" className="mr-1" />
+                              Mark as Complete
+                            </Button>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
+            <div className="flex items-start gap-3 mb-4">
+              <Sparkle className="text-accent flex-shrink-0 mt-1" size={24} weight="fill" />
+              <div>
+                <h3 className="font-semibold mb-1">Quick Tips</h3>
+                <p className="text-xs text-muted-foreground">Pro tips to accelerate learning</p>
+              </div>
+            </div>
+            <ul className="space-y-2">
+              {QUICK_TIPS.map((tip, index) => (
+                <li key={index} className="flex items-start gap-2 text-xs">
+                  <ArrowRight className="text-accent flex-shrink-0 mt-0.5" size={14} />
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </Card>
+
+          <Card className="p-4 bg-muted/50">
+            <h3 className="font-semibold mb-3 text-sm">Key Concepts</h3>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="pipeline">
+                <AccordionTrigger className="text-sm py-2">Pipeline</AccordionTrigger>
+                <AccordionContent className="text-xs text-muted-foreground">
+                  A high-level API that groups together a model with its preprocessing and postprocessing steps.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="tokenizer">
+                <AccordionTrigger className="text-sm py-2">Tokenizer</AccordionTrigger>
+                <AccordionContent className="text-xs text-muted-foreground">
+                  Converts text into numbers (tokens) that models can understand. Each model has its own tokenizer.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="fine-tuning">
+                <AccordionTrigger className="text-sm py-2">Fine-tuning</AccordionTrigger>
+                <AccordionContent className="text-xs text-muted-foreground">
+                  Training a pre-trained model further on your specific dataset. Much faster than training from scratch.
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="model-card">
+                <AccordionTrigger className="text-sm py-2">Model Card</AccordionTrigger>
+                <AccordionContent className="text-xs text-muted-foreground">
+                  Documentation describing training data, intended use, limitations, and performance metrics.
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </Card>
+
+          <div className="grid grid-cols-1 gap-3">
+            <Card className="p-3 text-center bg-primary/10 border-primary/30">
+              <div className="text-2xl font-bold text-accent mb-0.5">130K+</div>
+              <div className="text-xs text-muted-foreground">Models</div>
+            </Card>
+            <Card className="p-3 text-center bg-accent/10 border-accent/30">
+              <div className="text-2xl font-bold text-accent mb-0.5">75K+</div>
+              <div className="text-xs text-muted-foreground">Datasets</div>
+            </Card>
+            <Card className="p-3 text-center bg-primary/10 border-primary/30">
+              <div className="text-2xl font-bold text-accent mb-0.5">10M+</div>
+              <div className="text-xs text-muted-foreground">Users</div>
+            </Card>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {RESOURCES.map((resource, index) => {
@@ -105,51 +612,6 @@ export function LearningResources() {
             </Card>
           )
         })}
-      </div>
-
-      <Card className="p-6 bg-muted/50">
-        <h3 className="font-semibold mb-4">Common HuggingFace Concepts</h3>
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-medium text-sm mb-1">Pipeline</h4>
-            <p className="text-sm text-muted-foreground">
-              A high-level API that groups together a model with its preprocessing and postprocessing steps. The easiest way to use models.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm mb-1">Tokenizer</h4>
-            <p className="text-sm text-muted-foreground">
-              Converts text into numbers (tokens) that models can understand. Each model has its own tokenizer trained on specific vocabulary.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm mb-1">Fine-tuning</h4>
-            <p className="text-sm text-muted-foreground">
-              Taking a pre-trained model and training it further on your specific dataset. Much faster and requires less data than training from scratch.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-medium text-sm mb-1">Model Card</h4>
-            <p className="text-sm text-muted-foreground">
-              Documentation for each model describing its training data, intended use, limitations, and performance metrics. Always read before using a model.
-            </p>
-          </div>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 text-center bg-primary/10 border-primary/30">
-          <div className="text-3xl font-bold text-accent mb-1">130K+</div>
-          <div className="text-sm text-muted-foreground">Available Models</div>
-        </Card>
-        <Card className="p-4 text-center bg-accent/10 border-accent/30">
-          <div className="text-3xl font-bold text-accent mb-1">75K+</div>
-          <div className="text-sm text-muted-foreground">Datasets</div>
-        </Card>
-        <Card className="p-4 text-center bg-primary/10 border-primary/30">
-          <div className="text-3xl font-bold text-accent mb-1">10M+</div>
-          <div className="text-sm text-muted-foreground">Monthly Users</div>
-        </Card>
       </div>
     </div>
   )
