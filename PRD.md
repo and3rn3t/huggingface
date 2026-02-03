@@ -41,11 +41,25 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Success criteria**: Users find answers to common questions and gain conceptual understanding alongside practical exploration
 
 ### Favorites System
-- **Functionality**: Save and organize preferred datasets and models for quick access; view all favorites in a dedicated tab; toggle favorites with heart icon on any item
-- **Purpose**: Enable users to build a personalized collection of resources they want to reference frequently or revisit later
-- **Trigger**: User clicks heart icon on dataset/model card or navigates to Favorites tab
-- **Progression**: Click heart icon to add/remove → Item saved with timestamp → View in Favorites tab → Organized by type (datasets/models) → Remove from favorites with delete button
-- **Success criteria**: Users can easily save items, view their complete favorites collection, and manage saved items with persistence across sessions
+- **Functionality**: Save and organize preferred datasets and models for quick access; view all favorites in a dedicated tab; toggle favorites with heart icon on any item; add personal notes to each favorite
+- **Purpose**: Enable users to build a personalized collection of resources they want to reference frequently or revisit later, with context for why they saved each item
+- **Trigger**: User clicks heart icon on dataset/model card or navigates to Favorites tab; clicks note icon to add/edit notes
+- **Progression**: Click heart icon to add/remove → Item saved with timestamp → View in Favorites tab → Organized by type (datasets/models) → Add/edit notes with context → Remove from favorites with delete button
+- **Success criteria**: Users can easily save items, view their complete favorites collection, manage saved items with persistence across sessions, and maintain personal notes for each saved item
+
+### Model Comparison Tool
+- **Functionality**: Compare up to 3 models side-by-side viewing key metrics like parameters, speed, accuracy, downloads, and framework compatibility
+- **Purpose**: Help users make informed decisions when choosing between similar models by presenting direct comparisons
+- **Trigger**: User navigates to Compare tab and selects models from dropdown
+- **Progression**: Navigate to Compare tab → Select first model → Add additional models (up to 3) → View side-by-side comparison → Analyze differences in specs and performance → Clear comparison to start fresh
+- **Success criteria**: Users can efficiently compare models and identify the best choice for their specific requirements based on clear visual comparisons
+
+### Trending Section
+- **Functionality**: Display currently trending models and datasets based on download velocity, community engagement, and recent updates; show trend scores and growth percentages
+- **Purpose**: Keep users informed about what's popular and emerging in the HuggingFace community; surface valuable resources they might have missed
+- **Trigger**: User navigates to Trending tab or opens the app (default landing page)
+- **Progression**: View trending overview stats → Browse trending items ranked by trend score → See growth percentages and metrics → Click items for more details
+- **Success criteria**: Users discover relevant, currently popular resources and understand what makes items trending in the community
 
 ## Edge Case Handling
 
@@ -57,6 +71,9 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Invalid Input**: Real-time validation with helpful hints about expected format before API submission
 - **Empty Favorites**: Show welcoming empty state with clear instructions on how to add items to favorites; encourage exploration
 - **Duplicate Favorites**: Prevent adding the same item twice; provide feedback when attempting to favorite an already-saved item
+- **Comparison Limit**: Prevent adding more than 3 models to comparison; show helpful message explaining the limit
+- **No Models in Comparison**: Display encouraging empty state explaining how to add models to compare
+- **Trending Data Staleness**: Show timestamp of when trending data was last updated; handle scenarios where trending data might be unavailable
 
 ## Design Direction
 
@@ -97,22 +114,25 @@ Animations should feel responsive and data-driven, like information flowing thro
 ## Component Selection
 
 - **Components**: 
-  - Tabs for main navigation between Dataset Browser, Model Explorer, and API Playground sections
+  - Tabs for main navigation between Trending, Dataset Browser, Model Explorer, Compare, Favorites, API Playground, and Learn sections
   - Card components for dataset/model listings with hover states
   - Input and Select for search and filtering controls
-  - Dialog for detailed dataset/model information views
+  - Dialog for detailed dataset/model information views and note editing
   - Badge for tags, task types, and framework labels
   - Scroll Area for large lists and code snippets
   - Separator for visual organization of content sections
   - Skeleton for loading states
   - Toast (sonner) for API success/error feedback
   - Button with multiple variants (default for primary actions, outline for secondary, ghost for tertiary)
-  - Textarea for API playground input fields
+  - Textarea for API playground input fields and note editing
 - **Customizations**: 
   - Custom dataset preview component showing sample rows in table format
   - Custom code display component with syntax highlighting and copy functionality
   - Custom stat cards showing counts and metrics for HuggingFace platform
   - Custom filter panel combining multiple Select components with clear/reset functionality
+  - Custom comparison grid showing side-by-side model specifications and metrics
+  - Custom trending cards with progress bars and growth indicators
+  - Custom note display within favorite cards with edit functionality
 - **States**: 
   - Buttons: Default has gradient purple background, hover brightens with subtle lift, active slightly compresses, focus shows cyan ring
   - Cards: Default has dark slate background, hover lifts with deeper shadow and subtle purple glow, selected has cyan border accent
@@ -131,6 +151,14 @@ Animations should feel responsive and data-driven, like information flowing thro
   - ArrowRight (for navigation/next actions)
   - Heart (for favorites - outlined when not favorited, filled when favorited)
   - Trash (for removing favorites)
+  - Fire (for trending section)
+  - ArrowsLeftRight (for comparison)
+  - TrendUp (for trend indicators)
+  - ArrowUp (for growth indicators)
+  - Note / NotePencil (for notes on favorites)
+  - Plus (for adding items)
+  - X (for removing/closing)
+  - CheckCircle / XCircle (for accuracy indicators)
 - **Spacing**: 
   - Container padding: p-6 for main content areas
   - Card padding: p-4 for compact cards, p-6 for detailed views
@@ -138,9 +166,12 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Grid layouts: gap-4 for card grids
   - Consistent margin-bottom: mb-6 for section headers, mb-4 for subsections
 - **Mobile**: 
-  - Tabs convert to a horizontal scroll on mobile with snap points
+  - Tabs convert to a horizontal scroll on mobile with snap points; consider collapsing to 2-3 visible tabs with horizontal scrolling
   - Card grid changes from 3 columns (desktop) → 2 columns (tablet) → 1 column (mobile)
   - Filter panel collapses into a drawer/sheet that slides up from bottom on mobile
   - Two-column layouts (sidebar + content) stack vertically on mobile
   - Reduce padding to p-4 on mobile for better space utilization
   - Code snippets scroll horizontally in constrained containers with visible scrollbars
+  - Comparison grid stacks vertically on mobile, showing one model at a time with swipe navigation
+  - Trending stats cards flow in 2x2 grid on tablet, single column on mobile
+  - Note editing dialog takes full screen on mobile for easier text input

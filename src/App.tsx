@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Database, Cpu, Code, Book, Heart } from '@phosphor-icons/react'
+import { Database, Cpu, Code, Book, Heart, ArrowsLeftRight, Fire } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { DatasetBrowser } from '@/components/DatasetBrowser'
 import { ModelExplorer } from '@/components/ModelExplorer'
 import { ApiPlayground } from '@/components/ApiPlayground'
 import { LearningResources } from '@/components/LearningResources'
 import { FavoritesView } from '@/components/FavoritesView'
+import { ModelComparison } from '@/components/ModelComparison'
+import { TrendingSection } from '@/components/TrendingSection'
 import { useFavorites } from '@/hooks/use-favorites'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('datasets')
+  const [activeTab, setActiveTab] = useState('trending')
   const { favorites = [] } = useFavorites()
 
   return (
@@ -58,7 +60,11 @@ function App() {
 
         <main className="container mx-auto px-6 py-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-3xl mx-auto grid-cols-5 bg-muted/50">
+            <TabsList className="grid w-full max-w-5xl mx-auto grid-cols-7 bg-muted/50">
+              <TabsTrigger value="trending" className="gap-2">
+                <Fire size={18} />
+                <span className="hidden sm:inline">Trending</span>
+              </TabsTrigger>
               <TabsTrigger value="datasets" className="gap-2">
                 <Database size={18} />
                 <span className="hidden sm:inline">Datasets</span>
@@ -66,6 +72,10 @@ function App() {
               <TabsTrigger value="models" className="gap-2">
                 <Cpu size={18} />
                 <span className="hidden sm:inline">Models</span>
+              </TabsTrigger>
+              <TabsTrigger value="compare" className="gap-2">
+                <ArrowsLeftRight size={18} />
+                <span className="hidden sm:inline">Compare</span>
               </TabsTrigger>
               <TabsTrigger value="favorites" className="gap-2 relative">
                 <Heart size={18} weight={favorites.length > 0 ? 'fill' : 'regular'} />
@@ -86,12 +96,20 @@ function App() {
               </TabsTrigger>
             </TabsList>
 
+            <TabsContent value="trending" className="space-y-6">
+              <TrendingSection />
+            </TabsContent>
+
             <TabsContent value="datasets" className="space-y-6">
               <DatasetBrowser />
             </TabsContent>
 
             <TabsContent value="models" className="space-y-6">
               <ModelExplorer />
+            </TabsContent>
+
+            <TabsContent value="compare" className="space-y-6">
+              <ModelComparison />
             </TabsContent>
 
             <TabsContent value="favorites" className="space-y-6">

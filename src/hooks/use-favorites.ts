@@ -6,6 +6,7 @@ export interface FavoriteItem {
   type: 'dataset' | 'model'
   name: string
   addedAt: number
+  note?: string
 }
 
 export function useFavorites() {
@@ -40,6 +41,21 @@ export function useFavorites() {
     return (favorites || []).filter(fav => fav.type === type)
   }, [favorites])
 
+  const updateNote = useCallback((id: string, type: 'dataset' | 'model', note: string) => {
+    setFavorites((current = []) => {
+      return current.map(fav => 
+        fav.id === id && fav.type === type 
+          ? { ...fav, note: note.trim() || undefined }
+          : fav
+      )
+    })
+  }, [setFavorites])
+
+  const getNote = useCallback((id: string, type: 'dataset' | 'model') => {
+    const favorite = (favorites || []).find(fav => fav.id === id && fav.type === type)
+    return favorite?.note || ''
+  }, [favorites])
+
   return {
     favorites,
     addFavorite,
@@ -47,5 +63,7 @@ export function useFavorites() {
     isFavorite,
     toggleFavorite,
     getFavoritesByType,
+    updateNote,
+    getNote,
   }
 }

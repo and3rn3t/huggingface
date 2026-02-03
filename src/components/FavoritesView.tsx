@@ -1,12 +1,17 @@
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Heart, Database, Cpu, Trash } from '@phosphor-icons/react'
+import { Textarea } from '@/components/ui/textarea'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Heart, Database, Cpu, Trash, Note, NotePencil } from '@phosphor-icons/react'
 import { useFavorites } from '@/hooks/use-favorites'
 import { toast } from 'sonner'
 
 export function FavoritesView() {
-  const { favorites = [], removeFavorite } = useFavorites()
+  const { favorites = [], removeFavorite, updateNote, getNote } = useFavorites()
+  const [editingNote, setEditingNote] = useState<{ id: string; type: 'dataset' | 'model'; name: string } | null>(null)
+  const [noteText, setNoteText] = useState('')
 
   const datasetFavorites = favorites.filter(fav => fav.type === 'dataset')
   const modelFavorites = favorites.filter(fav => fav.type === 'model')
@@ -14,6 +19,20 @@ export function FavoritesView() {
   const handleRemove = (id: string, type: 'dataset' | 'model', name: string) => {
     removeFavorite(id, type)
     toast.success(`Removed ${name} from favorites`)
+  }
+
+  const openNoteDialog = (id: string, type: 'dataset' | 'model', name: string) => {
+    setEditingNote({ id, type, name })
+    setNoteText(getNote(id, type))
+  }
+
+  const saveNote = () => {
+    if (editingNote) {
+      updateNote(editingNote.id, editingNote.type, noteText)
+      toast.success('Note saved')
+      setEditingNote(null)
+      setNoteText('')
+    }
   }
 
   if (favorites.length === 0) {
@@ -57,22 +76,41 @@ export function FavoritesView() {
                 key={fav.id}
                 className="p-4 border-border hover:border-accent/50 transition-colors relative group"
               >
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleRemove(fav.id, fav.type, fav.name)}
-                >
-                  <Trash size={16} className="text-destructive" />
-                </Button>
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => openNoteDialog(fav.id, fav.type, fav.name)}
+                  >
+                    <NotePencil size={16} className="text-accent" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleRemove(fav.id, fav.type, fav.name)}
+                  >
+                    <Trash size={16} className="text-destructive" />
+                  </Button>
+                </div>
 
-                <div className="flex items-start gap-3 pr-8">
+                <div className="flex items-start gap-3 pr-16">
                   <Database className="text-accent flex-shrink-0" size={24} />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h4 className="font-medium text-base mb-1 truncate">{fav.name}</h4>
                     <Badge variant="outline" className="text-xs">
                       {fav.id}
                     </Badge>
+                    {fav.note && (
+                      <div className="mt-2 p-2 bg-muted/50 rounded border border-accent/20">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Note size={12} className="text-accent" />
+                          <span className="text-xs font-medium text-accent">Note</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{fav.note}</p>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground mt-2">
                       Added {new Date(fav.addedAt).toLocaleDateString()}
                     </p>
@@ -97,22 +135,41 @@ export function FavoritesView() {
                 key={fav.id}
                 className="p-4 border-border hover:border-accent/50 transition-colors relative group"
               >
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute top-2 right-2 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => handleRemove(fav.id, fav.type, fav.name)}
-                >
-                  <Trash size={16} className="text-destructive" />
-                </Button>
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => openNoteDialog(fav.id, fav.type, fav.name)}
+                  >
+                    <NotePencil size={16} className="text-accent" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleRemove(fav.id, fav.type, fav.name)}
+                  >
+                    <Trash size={16} className="text-destructive" />
+                  </Button>
+                </div>
 
-                <div className="flex items-start gap-3 pr-8">
+                <div className="flex items-start gap-3 pr-16">
                   <Cpu className="text-accent flex-shrink-0" size={24} />
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <h4 className="font-medium text-base mb-1 truncate">{fav.name}</h4>
                     <Badge variant="outline" className="text-xs truncate max-w-full">
                       {fav.id}
                     </Badge>
+                    {fav.note && (
+                      <div className="mt-2 p-2 bg-muted/50 rounded border border-accent/20">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Note size={12} className="text-accent" />
+                          <span className="text-xs font-medium text-accent">Note</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{fav.note}</p>
+                      </div>
+                    )}
                     <p className="text-xs text-muted-foreground mt-2">
                       Added {new Date(fav.addedAt).toLocaleDateString()}
                     </p>
@@ -123,6 +180,41 @@ export function FavoritesView() {
           </div>
         </div>
       )}
+
+      <Dialog open={!!editingNote} onOpenChange={() => setEditingNote(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <NotePencil className="text-accent" size={24} />
+              Add Note to {editingNote?.name}
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">Your Note</label>
+              <Textarea
+                placeholder="Add your thoughts, use cases, or reminders about this item..."
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                className="min-h-[120px]"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Keep track of why you saved this or how you plan to use it
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingNote(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveNote}>
+              Save Note
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
