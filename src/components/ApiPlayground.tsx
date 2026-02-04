@@ -1,3 +1,4 @@
+import { FeaturedModal } from '@/components/FeaturedModal';
 import {
   CodeExamples,
   ExecutionHistory,
@@ -31,6 +32,7 @@ import {
   classifyText,
   generateText,
   hasToken,
+  HFModel,
   runInference,
   summarizeText,
   translateText,
@@ -57,10 +59,10 @@ import {
   Star,
   Trash,
 } from '@phosphor-icons/react';
+import DOMPurify from 'dompurify';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import DOMPurify from 'dompurify';
 
 const PLAYGROUND_TASKS: PlaygroundTask[] = [
   {
@@ -180,6 +182,7 @@ export function ApiPlayground() {
   const [savedPrompts = [], setSavedPrompts] = useLocalStorage<
     { id: string; name: string; taskId: string; prompt: string }[]
   >('saved-prompts', []);
+  const [featuredModalOpen, setFeaturedModalOpen] = useState(false);
 
   const { trackPlaygroundRun } = useAchievements();
   const { showError } = useApiError();
@@ -394,7 +397,7 @@ export function ApiPlayground() {
       url.searchParams.set('task', selectedTask.id);
       url.searchParams.set('model', selectedModel);
       url.searchParams.set('prompt', encodeURIComponent(input));
-      
+
       if (selectedTask.parameters?.temperature) {
         url.searchParams.set('temp', temperature[0].toString());
       }
@@ -427,10 +430,35 @@ export function ApiPlayground() {
     }
   };
 
+  const handleFeaturedModelSelect = (model: HFModel) => {
+    const modelId = model.id || model.modelId;
+    const pipelineTag = model.pipeline_tag || 'text-generation';
+
+    // Find matching task for this model's pipeline tag
+    const matchingTask = PLAYGROUND_TASKS.find((t) => t.id === pipelineTag);
+
+    if (matchingTask) {
+      setSelectedTask(matchingTask);
+      // Use the model ID from the featured model, or fallback to task's first model
+      setSelectedModel(matchingTask.models.includes(modelId) ? modelId : matchingTask.models[0]);
+      setInput(matchingTask.exampleInput || '');
+      toast.success(`Loaded ${modelId}`, {
+        description: `Ready to experiment with ${matchingTask.name}`,
+      });
+    } else {
+      // Fallback to text-generation if no matching task
+      setSelectedTask(PLAYGROUND_TASKS[0]);
+      setSelectedModel(PLAYGROUND_TASKS[0].models[0]);
+      toast.info('Model loaded', {
+        description: 'This model may work best with a different task type',
+      });
+    }
+  };
+
   // Restore state from URL params on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    
+
     const taskParam = params.get('task');
     const modelParam = params.get('model');
     const promptParam = params.get('prompt');
@@ -443,10 +471,10 @@ export function ApiPlayground() {
     if (taskParam) {
       // Sanitize and validate task ID
       const sanitizedTaskId = DOMPurify.sanitize(taskParam, { ALLOWED_TAGS: [] });
-      const validTaskIds = PLAYGROUND_TASKS.map(t => t.id);
-      
+      const validTaskIds = PLAYGROUND_TASKS.map((t) => t.id);
+
       if (validTaskIds.includes(sanitizedTaskId)) {
-        const task = PLAYGROUND_TASKS.find(t => t.id === sanitizedTaskId);
+        const task = PLAYGROUND_TASKS.find((t) => t.id === sanitizedTaskId);
         if (task) {
           setSelectedTask(task);
 
@@ -543,7 +571,12 @@ export function ApiPlayground() {
               <Share />
               Share
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setFeaturedModalOpen(true)}
+            >
               <Star />
               Featured
             </Button>
@@ -815,6 +848,12 @@ export function ApiPlayground() {
           </div>
         </TabsContent>
       </Tabs>
+
+      <FeaturedModal
+        open={featuredModalOpen}
+        onOpenChange={setFeaturedModalOpen}
+        onSelectModel={handleFeaturedModelSelect}
+      />
     </div>
   );
 }
