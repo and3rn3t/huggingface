@@ -1,14 +1,14 @@
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react-swc";
-import { defineConfig, PluginOption } from "vite";
-import { visualizer } from "rollup-plugin-visualizer";
-import { VitePWA } from "vite-plugin-pwa";
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react-swc';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig, PluginOption } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
-import sparkPlugin from "@github/spark/spark-vite-plugin";
-import createIconImportProxy from "@github/spark/vitePhosphorIconProxyPlugin";
-import { resolve } from 'path'
+import sparkPlugin from '@github/spark/spark-vite-plugin';
+import createIconImportProxy from '@github/spark/vitePhosphorIconProxyPlugin';
+import { resolve } from 'path';
 
-const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
+const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname;
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -28,7 +28,7 @@ export default defineConfig({
     // PWA configuration
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.svg', 'mask-icon.svg'],
       manifest: {
         name: 'HuggingFace Playground',
         short_name: 'HF Playground',
@@ -41,19 +41,19 @@ export default defineConfig({
         start_url: '/',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'pwa-192x192.svg',
             sizes: '192x192',
-            type: 'image/png',
+            type: 'image/svg+xml',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'pwa-512x512.svg',
             sizes: '512x512',
-            type: 'image/png',
+            type: 'image/svg+xml',
             purpose: 'any maskable',
           },
         ],
@@ -107,8 +107,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': resolve(projectRoot, 'src')
-    }
+      '@': resolve(projectRoot, 'src'),
+    },
   },
   build: {
     // Code splitting configuration
