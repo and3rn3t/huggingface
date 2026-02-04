@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +12,7 @@ import {
   Sparkle,
   TrendUp,
 } from '@phosphor-icons/react';
+import { useMemo } from 'react';
 
 interface TrendingItem {
   id: string;
@@ -147,8 +147,10 @@ export function TrendingSection() {
       </div>
 
       {error && (
-        <Card className="p-4 border-destructive/50 bg-destructive/10">
-          <p className="text-destructive text-sm">Failed to load trending items. Please try again.</p>
+        <Card className="border-destructive/50 bg-destructive/10 p-4">
+          <p className="text-destructive text-sm">
+            Failed to load trending items. Please try again.
+          </p>
         </Card>
       )}
 
@@ -243,6 +245,10 @@ export function TrendingSection() {
                   className={`hover:shadow-accent/20 border-border hover:border-accent/50 relative cursor-pointer p-4 transition-all hover:-translate-y-1 hover:shadow-lg ${
                     isTopTrending ? 'from-card to-accent/5 bg-gradient-to-br' : ''
                   }`}
+                  onClick={() => {
+                    const url = `https://huggingface.co/${item.type === 'dataset' ? 'datasets/' : ''}${item.id}`;
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  }}
                 >
                   {isTopTrending && (
                     <div className="absolute -top-2 -right-2">
