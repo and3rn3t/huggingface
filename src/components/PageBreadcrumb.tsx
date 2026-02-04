@@ -83,7 +83,7 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
         </Button>
       )}
       
-      <Breadcrumb>
+      <Breadcrumb aria-label="Page navigation breadcrumb">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink 
@@ -118,7 +118,7 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
           
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage className="text-foreground font-medium">
+            <BreadcrumbPage className="text-foreground font-medium" aria-current="page">
               {label}
             </BreadcrumbPage>
           </BreadcrumbItem>

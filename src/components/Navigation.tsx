@@ -104,10 +104,10 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
       <div className="flex items-center gap-2">
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="relative">
-              <List size={20} />
+            <Button variant="outline" size="icon" className="relative" aria-label={`Open navigation menu${favoritesCount > 0 ? `, ${favoritesCount} favorites` : ''}`}>
+              <List size={20} aria-hidden="true" />
               {favoritesCount > 0 && (
-                <span className="border-background absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 bg-red-500 text-xs font-medium text-white">
+                <span className="border-background absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 bg-red-500 text-xs font-medium text-white" aria-hidden="true">
                   {favoritesCount}
                 </span>
               )}
@@ -118,47 +118,47 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
               <SheetTitle>Navigation</SheetTitle>
             </SheetHeader>
 
-            <div className="mt-6 space-y-6">
-              <div>
-                <h3 className="text-muted-foreground mb-3 px-3 text-sm font-medium">Discover</h3>
-                <div className="space-y-1" onClick={() => handleTabChange('trending')}>
+            <nav className="mt-6 space-y-6" role="navigation" aria-label="Main navigation">
+              <div role="group" aria-labelledby="nav-discover-heading">
+                <h3 id="nav-discover-heading" className="text-muted-foreground mb-3 px-3 text-sm font-medium">Discover</h3>
+                <div className="space-y-1" onClick={() => handleTabChange('trending')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('trending')} tabIndex={0} role="button">
                   {getNavItem('trending')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('datasets')}>
+                <div className="space-y-1" onClick={() => handleTabChange('datasets')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('datasets')} tabIndex={0} role="button">
                   {getNavItem('datasets')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('models')}>
+                <div className="space-y-1" onClick={() => handleTabChange('models')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('models')} tabIndex={0} role="button">
                   {getNavItem('models')}
                 </div>
               </div>
 
               <Separator />
 
-              <div>
-                <h3 className="text-muted-foreground mb-3 px-3 text-sm font-medium">Tools</h3>
-                <div className="space-y-1" onClick={() => handleTabChange('compare')}>
+              <div role="group" aria-labelledby="nav-tools-heading">
+                <h3 id="nav-tools-heading" className="text-muted-foreground mb-3 px-3 text-sm font-medium">Tools</h3>
+                <div className="space-y-1" onClick={() => handleTabChange('compare')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('compare')} tabIndex={0} role="button">
                   {getNavItem('compare')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('playground')}>
+                <div className="space-y-1" onClick={() => handleTabChange('playground')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('playground')} tabIndex={0} role="button">
                   {getNavItem('playground')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('learn')}>
+                <div className="space-y-1" onClick={() => handleTabChange('learn')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('learn')} tabIndex={0} role="button">
                   {getNavItem('learn')}
                 </div>
               </div>
 
               <Separator />
 
-              <div>
-                <h3 className="text-muted-foreground mb-3 px-3 text-sm font-medium">Personal</h3>
-                <div className="space-y-1" onClick={() => handleTabChange('favorites')}>
+              <div role="group" aria-labelledby="nav-personal-heading">
+                <h3 id="nav-personal-heading" className="text-muted-foreground mb-3 px-3 text-sm font-medium">Personal</h3>
+                <div className="space-y-1" onClick={() => handleTabChange('favorites')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('favorites')} tabIndex={0} role="button">
                   {getNavItem('favorites')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('achievements')}>
+                <div className="space-y-1" onClick={() => handleTabChange('achievements')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('achievements')} tabIndex={0} role="button">
                   {getNavItem('achievements')}
                 </div>
               </div>
-            </div>
+            </nav>
           </SheetContent>
         </Sheet>
 
@@ -194,7 +194,7 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
 
   return (
     <div className="w-full">
-      <Tabs value={activeTab} onValueChange={onTabChange}>
+      <Tabs value={activeTab} onValueChange={onTabChange} aria-label="Main navigation">
         <div className="flex w-full items-center gap-4">
           <TabsList className="bg-muted/30 inline-flex h-auto p-1 backdrop-blur-sm">
             <div className="flex items-center gap-1">
