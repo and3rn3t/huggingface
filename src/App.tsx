@@ -21,10 +21,11 @@ const AchievementsPanel = lazy(() => import('@/components/AchievementsPanel').th
 // Loading fallback component
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center min-h-[400px]">
+    <div className="flex items-center justify-center min-h-[400px]" role="status" aria-live="polite" aria-busy="true">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        <p className="text-sm text-muted-foreground">Loading...</p>
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+        <p className="text-sm text-muted-foreground">Loading content, please wait...</p>
+        <span className="sr-only">Loading page content</span>
       </div>
     </div>
   )
@@ -66,7 +67,15 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
+      {/* Skip to main content link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+      >
+        Skip to main content
+      </a>
+      
+      <div className="absolute inset-0 opacity-10" aria-hidden="true">
         <div className="absolute inset-0" style={{
           backgroundImage: `
             radial-gradient(circle at 20% 50%, oklch(0.75 0.15 195) 0%, transparent 50%),
@@ -93,7 +102,7 @@ function App() {
       </div>
 
       <div className="relative">
-        <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50" role="banner">
           <div className="container mx-auto px-4 lg:px-6 py-4 lg:py-6">
             <div className="flex items-center justify-between gap-4 mb-4 lg:mb-0">
               <div className="flex items-center gap-3">
@@ -119,7 +128,7 @@ function App() {
           </div>
         </header>
 
-        <main className="container mx-auto px-4 lg:px-6 py-6 lg:py-8">
+        <main id="main-content" className="container mx-auto px-4 lg:px-6 py-6 lg:py-8" role="main" aria-label="Main content">
           <div className="mb-4">
             <PageBreadcrumb 
               activeTab={activeTab} 
@@ -144,7 +153,7 @@ function App() {
           </div>
         </main>
 
-        <footer className="border-t border-border mt-16 py-8">
+        <footer className="border-t border-border mt-16 py-8" role="contentinfo">
           <div className="container mx-auto px-4 lg:px-6 text-center text-sm text-muted-foreground">
             <p>Educational playground for exploring HuggingFace platform features</p>
             <p className="mt-2">Built to help you learn about datasets, models, and the Inference API</p>

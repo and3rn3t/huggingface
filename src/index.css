@@ -25,6 +25,42 @@
   }
 }
 
+/* Focus visible styles for keyboard navigation */
+@layer base {
+  /* Ensure focus ring is visible for all interactive elements */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  
+  /* Improve focus visibility on buttons and links */
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius);
+  }
+  
+  /* Remove default outline when using mouse */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 :root {
   --background: oklch(0.15 0.03 265);
   --foreground: oklch(0.95 0.01 285);
