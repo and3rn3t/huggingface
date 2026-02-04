@@ -12,15 +12,18 @@ interface Env {
 
 const HF_API_BASE = 'https://huggingface.co/api';
 const HF_CHAT_COMPLETIONS = 'https://router.huggingface.co/v1/chat/completions';
+const HF_SERVERLESS_INFERENCE = 'https://api-inference.huggingface.co/models';
 
-// Map old model IDs to new ones available in Inference Providers
-const MODEL_MAPPING: Record<string, string> = {
-  'gpt2': 'meta-llama/Llama-3.2-1B-Instruct',
+// Models that should use chat completions API (text generation models)
+const CHAT_MODELS = new Set(['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl', 'distilgpt2']);
+
+// Map chat model IDs to new ones available in Inference Providers
+const CHAT_MODEL_MAPPING: Record<string, string> = {
+  gpt2: 'meta-llama/Llama-3.2-1B-Instruct',
   'gpt2-medium': 'meta-llama/Llama-3.2-3B-Instruct',
   'gpt2-large': 'meta-llama/Llama-3.3-70B-Instruct',
-  'distilgpt2': 'meta-llama/Llama-3.2-1B-Instruct',
-  'facebook/bart-large-cnn': 'meta-llama/Llama-3.3-70B-Instruct',
-  // Add more mappings as needed
+  'gpt2-xl': 'meta-llama/Llama-3.3-70B-Instruct',
+  distilgpt2: 'meta-llama/Llama-3.2-1B-Instruct',
 };
 
 export async function onRequest(context: {
@@ -46,30 +49,10 @@ export async function onRequest(context: {
   try {
     const pathSegments = params.path || [];
 
-    // Handle inference requests - convert to new chat completions API
+    // Handle inference requests
     if (pathSegments[0] === 'inference' && request.method === 'POST') {
       const modelId = pathSegments.slice(1).join('/');
       const oldBody = (await request.json()) as any;
-
-      // Map old model ID to new one if needed
-      const newModelId = MODEL_MAPPING[modelId] || modelId;
-
-      // Convert old format to chat completions format
-      const prompt =
-        typeof oldBody.inputs === 'string' ? oldBody.inputs : JSON.stringify(oldBody.inputs);
-
-      const newBody = {
-        model: newModelId,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        max_tokens: oldBody.parameters?.max_new_tokens || oldBody.parameters?.max_length || 100,
-        temperature: oldBody.parameters?.temperature || 0.7,
-        stream: false,
-      };
 
       // Get auth token
       const authHeader = request.headers.get('Authorization');
@@ -85,22 +68,61 @@ export async function onRequest(context: {
         });
       }
 
-      const response = await fetch(HF_CHAT_COMPLETIONS, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newBody),
-      });
+      // Use chat completions API for text generation models
+      if (CHAT_MODELS.has(modelId)) {
+        const newModelId = CHAT_MODEL_MAPPING[modelId] || modelId;
 
-      if (!response.ok) {
-        const errorBody = await response.text();
-        console.error(`Chat completions error: ${response.status} ${response.statusText}`);
-        console.error(`Error body: ${errorBody.substring(0, 500)}`);
+        // Convert old format to chat completions format
+        const prompt =
+          typeof oldBody.inputs === 'string' ? oldBody.inputs : JSON.stringify(oldBody.inputs);
 
-        return new Response(errorBody, {
-          status: response.status,
+        const newBody = {
+          model: newModelId,
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          max_tokens: oldBody.parameters?.max_new_tokens || oldBody.parameters?.max_length || 100,
+          temperature: oldBody.parameters?.temperature || 0.7,
+          stream: false,
+        };
+
+        const response = await fetch(HF_CHAT_COMPLETIONS, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newBody),
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          console.error(`Chat completions error: ${response.status} ${response.statusText}`);
+          console.error(`Error body: ${errorBody.substring(0, 500)}`);
+
+          return new Response(errorBody, {
+            status: response.status,
+            headers: {
+              'Content-Type': 'application/json',
+              'Access-Control-Allow-Origin': '*',
+            },
+          });
+        }
+
+        const chatResponse = (await response.json()) as any;
+
+        // Convert back to old format for backward compatibility
+        const oldFormatResponse = [
+          {
+            generated_text: chatResponse.choices?.[0]?.message?.content || '',
+          },
+        ];
+
+        return new Response(JSON.stringify(oldFormatResponse), {
+          status: 200,
           headers: {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
@@ -108,21 +130,33 @@ export async function onRequest(context: {
         });
       }
 
-      const chatResponse = (await response.json()) as any;
+      // Use serverless inference API for other models (classification, etc.)
+      const targetUrl = `${HF_SERVERLESS_INFERENCE}/${modelId}`;
 
-      // Convert back to old format for backward compatibility
-      const oldFormatResponse = [
-        {
-          generated_text: chatResponse.choices?.[0]?.message?.content || '',
-        },
-      ];
-
-      return new Response(JSON.stringify(oldFormatResponse), {
-        status: 200,
+      const response = await fetch(targetUrl, {
+        method: 'POST',
         headers: {
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
         },
+        body: JSON.stringify(oldBody),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`Serverless inference error: ${response.status} ${response.statusText}`);
+        console.error(`Error body: ${errorBody.substring(0, 500)}`);
+      }
+
+      const responseHeaders = new Headers(response.headers);
+      responseHeaders.set('Access-Control-Allow-Origin', '*');
+      responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+      responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: responseHeaders,
       });
     }
 
