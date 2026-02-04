@@ -3,7 +3,7 @@
  *
  * Proxies requests to HuggingFace API to avoid CORS issues.
  * All requests to /api/* are forwarded to huggingface.co/api/*
- * All requests to /api/inference/* are forwarded to api-inference.huggingface.co/models/*
+ * All requests to /api/inference/* are forwarded to router.huggingface.co/*
  */
 
 interface Env {
@@ -11,7 +11,7 @@ interface Env {
 }
 
 const HF_API_BASE = 'https://huggingface.co/api';
-const HF_INFERENCE_BASE = 'https://api-inference.huggingface.co/models';
+const HF_INFERENCE_BASE = 'https://router.huggingface.co';
 
 export async function onRequest(context: {
   request: Request;
@@ -39,7 +39,7 @@ export async function onRequest(context: {
     let targetUrl: string;
 
     if (pathSegments[0] === 'inference') {
-      // Inference API: /api/inference/model-name -> https://api-inference.huggingface.co/models/model-name
+      // Inference API: /api/inference/model-name -> https://router.huggingface.co/model-name
       const modelPath = pathSegments.slice(1).join('/');
       targetUrl = `${HF_INFERENCE_BASE}/${modelPath}${url.search}`;
     } else {
