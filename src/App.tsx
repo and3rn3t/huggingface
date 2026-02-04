@@ -1,14 +1,14 @@
-import { Navigation, PageBreadcrumb, QuickNav } from '@/components/layout';
 import { StatsWidget } from '@/components/features/trending';
+import { Navigation, PageBreadcrumb, QuickNav } from '@/components/layout';
 import { PageTransition } from '@/components/ui/page-transition';
 import { Toaster } from '@/components/ui/sonner';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useNavigationHistory } from '@/hooks/use-navigation-history';
 import { Code } from '@phosphor-icons/react';
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 
 // Lazy load with retry on failure (handles stale chunks after deployment)
-const lazyWithRetry = (componentImport: () => Promise<any>) =>
+const lazyWithRetry = (componentImport: () => Promise<{ default: React.ComponentType }>) =>
   lazy(async () => {
     const pageHasAlreadyBeenForceRefreshed = JSON.parse(
       window.sessionStorage.getItem('page-has-been-force-refreshed') || 'false'
@@ -82,12 +82,12 @@ function App() {
     setActiveTab(tab);
   };
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
     const previousTab = goBack();
     if (previousTab) {
       setActiveTab(previousTab);
     }
-  };
+  }, [goBack]);
 
   useEffect(() => {
     pushToHistory(activeTab);
@@ -112,7 +112,7 @@ function App() {
       {/* Skip to main content link for keyboard users */}
       <a
         href="#main-content"
-        className="focus:bg-primary focus:text-primary-foreground focus:ring-ring sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:px-4 focus:py-2 focus:ring-2 focus:outline-none"
+        className="focus:bg-primary focus:text-primary-foreground focus:ring-ring sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100 focus:rounded-md focus:px-4 focus:py-2 focus:ring-2 focus:outline-none"
       >
         Skip to main content
       </a>
@@ -157,7 +157,7 @@ function App() {
           <div className="container mx-auto px-4 py-4 lg:px-6 lg:py-6">
             <div className="mb-4 flex items-center justify-between gap-4 lg:mb-0">
               <div className="flex items-center gap-3">
-                <div className="from-primary to-accent flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br">
+                <div className="from-primary to-accent flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br">
                   <Code className="text-white" size={24} weight="bold" />
                 </div>
                 <div>
