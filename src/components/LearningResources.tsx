@@ -1,42 +1,59 @@
-import { useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { 
-  Book, Sparkle, ArrowRight, Code, Database, Cpu, 
-  CheckCircle, Circle, Trophy, Lightbulb, Target,
-  PlayCircle, BookOpen, GraduationCap, Star, Brain
-} from '@phosphor-icons/react'
-import { useKV } from '@github/spark/hooks'
-import { useAchievements } from '@/hooks/use-achievements'
-import { StreakTracker } from '@/components/StreakTracker'
-import { motion, AnimatePresence } from 'framer-motion'
-import { toast } from 'sonner'
+import { StreakTracker } from '@/components/StreakTracker';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { useAchievements } from '@/hooks/use-achievements';
+import { useKV } from '@github/spark/hooks';
+import {
+  ArrowRight,
+  Book,
+  BookOpen,
+  Brain,
+  CheckCircle,
+  Circle,
+  Code,
+  Cpu,
+  Database,
+  GraduationCap,
+  Lightbulb,
+  Sparkle,
+  Star,
+  Target,
+  Trophy,
+} from '@phosphor-icons/react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 interface Resource {
-  title: string
-  description: string
-  category: 'Getting Started' | 'Documentation' | 'Tutorial' | 'Best Practice'
-  icon: typeof Book
-  link?: string
+  title: string;
+  description: string;
+  category: 'Getting Started' | 'Documentation' | 'Tutorial' | 'Best Practice';
+  icon: typeof Book;
+  link?: string;
 }
 
 interface Lesson {
-  id: string
-  title: string
-  description: string
-  content: string
-  quiz?: Quiz
-  icon: typeof Book
+  id: string;
+  title: string;
+  description: string;
+  content: string;
+  quiz?: Quiz;
+  icon: typeof Book;
 }
 
 interface Quiz {
-  question: string
-  options: string[]
-  correctAnswer: number
-  explanation: string
+  question: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
 }
 
 const LESSONS: Lesson[] = [
@@ -59,11 +76,12 @@ The platform democratizes AI by making state-of-the-art models accessible to eve
         'They are always 100% accurate',
         'You can use them without training from scratch',
         'They only work with English text',
-        'They require no API token'
+        'They require no API token',
       ],
       correctAnswer: 1,
-      explanation: 'Pre-trained models save time and resources by allowing you to use or fine-tune existing models instead of training from scratch.'
-    }
+      explanation:
+        'Pre-trained models save time and resources by allowing you to use or fine-tune existing models instead of training from scratch.',
+    },
   },
   {
     id: 'understanding-models',
@@ -91,8 +109,9 @@ Choose based on your task, accuracy needs, and speed requirements.`,
       question: 'Which model type is best suited for text generation tasks?',
       options: ['BERT', 'GPT', 'ViT', 'CLIP'],
       correctAnswer: 1,
-      explanation: 'GPT (Generative Pre-trained Transformer) models are specifically designed for generating coherent text.'
-    }
+      explanation:
+        'GPT (Generative Pre-trained Transformer) models are specifically designed for generating coherent text.',
+    },
   },
   {
     id: 'datasets-deep-dive',
@@ -123,11 +142,12 @@ Choose based on your task, accuracy needs, and speed requirements.`,
         'Final model evaluation',
         'Training the model',
         'Tuning hyperparameters',
-        'Data visualization'
+        'Data visualization',
       ],
       correctAnswer: 2,
-      explanation: 'The validation split is used to tune hyperparameters and make decisions during training without touching the test set.'
-    }
+      explanation:
+        'The validation split is used to tune hyperparameters and make decisions during training without touching the test set.',
+    },
   },
   {
     id: 'inference-api',
@@ -166,11 +186,12 @@ const response = await fetch(
         'Network congestion',
         'Cold start - model loading',
         'Too much input text',
-        'Wrong API token'
+        'Wrong API token',
       ],
       correctAnswer: 1,
-      explanation: 'Cold starts occur when a model needs to be loaded into memory. Popular models are kept warm to avoid this.'
-    }
+      explanation:
+        'Cold starts occur when a model needs to be loaded into memory. Popular models are kept warm to avoid this.',
+    },
   },
   {
     id: 'best-practices',
@@ -208,130 +229,147 @@ const response = await fetch(
         'Higher accuracy',
         'Better multilingual support',
         'Faster inference with minimal accuracy loss',
-        'Larger context windows'
+        'Larger context windows',
       ],
       correctAnswer: 2,
-      explanation: 'Distilled models are compressed versions that maintain ~95-97% of performance while being significantly faster and smaller.'
-    }
-  }
-]
+      explanation:
+        'Distilled models are compressed versions that maintain ~95-97% of performance while being significantly faster and smaller.',
+    },
+  },
+];
 
 const RESOURCES: Resource[] = [
   {
     title: 'What is HuggingFace?',
-    description: 'HuggingFace is a platform for machine learning, offering tools, models, and datasets. It\'s best known for the Transformers library and model hub.',
+    description:
+      "HuggingFace is a platform for machine learning, offering tools, models, and datasets. It's best known for the Transformers library and model hub.",
     category: 'Getting Started',
-    icon: Sparkle
+    icon: Sparkle,
+    link: 'https://huggingface.co/docs',
   },
   {
     title: 'Understanding Datasets',
-    description: 'Datasets are collections of data used to train ML models. HuggingFace hosts thousands of datasets for tasks like text classification, translation, and more.',
+    description:
+      'Datasets are collections of data used to train ML models. HuggingFace hosts thousands of datasets for tasks like text classification, translation, and more.',
     category: 'Getting Started',
-    icon: Database
+    icon: Database,
+    link: 'https://huggingface.co/docs/datasets',
   },
   {
     title: 'Exploring Models',
-    description: 'Pre-trained models are ready-to-use neural networks. You can use them directly or fine-tune them for specific tasks without training from scratch.',
+    description:
+      'Pre-trained models are ready-to-use neural networks. You can use them directly or fine-tune them for specific tasks without training from scratch.',
     category: 'Getting Started',
-    icon: Cpu
+    icon: Cpu,
+    link: 'https://huggingface.co/docs/transformers',
   },
   {
     title: 'Inference API Basics',
-    description: 'The Inference API lets you use models without downloading them. Send HTTP requests with your data and get predictions back instantly.',
+    description:
+      'The Inference API lets you use models without downloading them. Send HTTP requests with your data and get predictions back instantly.',
     category: 'Tutorial',
-    icon: Code
+    icon: Code,
+    link: 'https://huggingface.co/docs/api-inference',
   },
   {
     title: 'Choosing the Right Model',
-    description: 'Consider your task (classification, generation, etc.), language requirements, model size, and inference speed when selecting a model.',
+    description:
+      'Consider your task (classification, generation, etc.), language requirements, model size, and inference speed when selecting a model.',
     category: 'Best Practice',
-    icon: Book
+    icon: Book,
+    link: 'https://huggingface.co/docs/transformers/model_doc/auto',
   },
   {
     title: 'API Token Usage',
-    description: 'Get an API token from your HuggingFace account settings. Use it in request headers for higher rate limits and access to private models.',
+    description:
+      'Get an API token from your HuggingFace account settings. Use it in request headers for higher rate limits and access to private models.',
     category: 'Documentation',
-    icon: Code
-  }
-]
+    icon: Code,
+    link: 'https://huggingface.co/docs/hub/security-tokens',
+  },
+];
 
 const QUICK_TIPS = [
-  'Start with popular models (high download counts) - they\'re well-tested and documented',
-  'Use the \'distil\' versions of models (like DistilBERT) for faster inference with minimal accuracy loss',
+  "Start with popular models (high download counts) - they're well-tested and documented",
+  "Use the 'distil' versions of models (like DistilBERT) for faster inference with minimal accuracy loss",
   'Most text models work best with English - check language tags for multilingual support',
-  'The Inference API has rate limits - consider caching results for repeated queries'
-]
+  'The Inference API has rate limits - consider caching results for repeated queries',
+];
 
 export function LearningResources() {
-  const [completedLessons = [], setCompletedLessons] = useKV<string[]>('completed-lessons', [])
-  const [quizScores = {}, setQuizScores] = useKV<Record<string, boolean>>('quiz-scores', {})
-  const [selectedLesson, setSelectedLesson] = useState<string | null>(null)
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
-  const [showExplanation, setShowExplanation] = useState(false)
-  
-  const { trackLessonComplete, trackQuizPass } = useAchievements()
+  const [completedLessons = [], setCompletedLessons] = useKV<string[]>('completed-lessons', []);
+  const [quizScores = {}, setQuizScores] = useKV<Record<string, boolean>>('quiz-scores', {});
+  const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [showExplanation, setShowExplanation] = useState(false);
 
-  const currentLesson = LESSONS.find(l => l.id === selectedLesson)
-  const progress = (completedLessons.length / LESSONS.length) * 100
-  const totalQuizzes = LESSONS.filter(l => l.quiz).length
-  const passedQuizzes = Object.values(quizScores).filter(Boolean).length
+  const { trackLessonComplete, trackQuizPass } = useAchievements();
+
+  const currentLesson = LESSONS.find((l) => l.id === selectedLesson);
+  const progress = (completedLessons.length / LESSONS.length) * 100;
+  const totalQuizzes = LESSONS.filter((l) => l.quiz).length;
+  const passedQuizzes = Object.values(quizScores).filter(Boolean).length;
 
   const handleLessonComplete = (lessonId: string) => {
-    setCompletedLessons(current => {
-      const lessons = current || []
+    setCompletedLessons((current) => {
+      const lessons = current || [];
       if (!lessons.includes(lessonId)) {
-        const newLessons = [...lessons, lessonId]
-        trackLessonComplete(newLessons.length)
+        const newLessons = [...lessons, lessonId];
+        trackLessonComplete(newLessons.length);
         toast.success('Lesson completed!', {
-          description: 'Keep up the great work!'
-        })
-        return newLessons
+          description: 'Keep up the great work!',
+        });
+        return newLessons;
       }
-      return lessons
-    })
-  }
+      return lessons;
+    });
+  };
 
   const handleQuizSubmit = (lessonId: string, correct: boolean) => {
-    setQuizScores(current => {
-      const newScores = { ...(current || {}), [lessonId]: correct }
-      const passedCount = Object.values(newScores).filter(Boolean).length
-      trackQuizPass(passedCount)
-      return newScores
-    })
-    setShowExplanation(true)
-    
+    setQuizScores((current) => {
+      const newScores = { ...(current || {}), [lessonId]: correct };
+      const passedCount = Object.values(newScores).filter(Boolean).length;
+      trackQuizPass(passedCount);
+      return newScores;
+    });
+    setShowExplanation(true);
+
     if (correct) {
       toast.success('Correct!', {
-        description: 'You\'ve mastered this concept!'
-      })
-      handleLessonComplete(lessonId)
+        description: "You've mastered this concept!",
+      });
+      handleLessonComplete(lessonId);
     } else {
       toast.error('Not quite right', {
-        description: 'Review the explanation and try again!'
-      })
+        description: 'Review the explanation and try again!',
+      });
     }
-  }
+  };
 
   const resetQuiz = () => {
-    setSelectedAnswer(null)
-    setShowExplanation(false)
-  }
+    setSelectedAnswer(null);
+    setShowExplanation(false);
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold mb-2 tracking-tight">Learning Center</h2>
-          <p className="text-muted-foreground">Master HuggingFace with interactive lessons and quizzes</p>
+          <h2 className="mb-2 text-2xl font-semibold tracking-tight">Learning Center</h2>
+          <p className="text-muted-foreground">
+            Master HuggingFace with interactive lessons and quizzes
+          </p>
         </div>
-        
+
         {completedLessons.length > 0 && (
-          <Card className="p-4 bg-gradient-to-br from-accent/20 to-primary/20 border-accent/50">
+          <Card className="from-accent/20 to-primary/20 border-accent/50 bg-gradient-to-br p-4">
             <div className="flex items-center gap-3">
               <Trophy className="text-accent" size={32} weight="fill" />
               <div>
-                <div className="text-2xl font-bold">{completedLessons.length}/{LESSONS.length}</div>
-                <div className="text-xs text-muted-foreground">Lessons Completed</div>
+                <div className="text-2xl font-bold">
+                  {completedLessons.length}/{LESSONS.length}
+                </div>
+                <div className="text-muted-foreground text-xs">Lessons Completed</div>
               </div>
             </div>
           </Card>
@@ -340,36 +378,38 @@ export function LearningResources() {
 
       <StreakTracker />
 
-      <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
-        <div className="flex items-center justify-between mb-4">
+      <Card className="from-primary/10 to-accent/10 border-primary/30 bg-gradient-to-br p-6">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <GraduationCap className="text-accent" size={28} weight="bold" />
             <div>
-              <h3 className="font-semibold text-lg">Your Progress</h3>
-              <p className="text-sm text-muted-foreground">{Math.round(progress)}% complete</p>
+              <h3 className="text-lg font-semibold">Your Progress</h3>
+              <p className="text-muted-foreground text-sm">{Math.round(progress)}% complete</p>
             </div>
           </div>
           <div className="text-right">
-            <div className="text-sm font-medium text-accent">{passedQuizzes}/{totalQuizzes} Quizzes Passed</div>
+            <div className="text-accent text-sm font-medium">
+              {passedQuizzes}/{totalQuizzes} Quizzes Passed
+            </div>
           </div>
         </div>
         <Progress value={progress} className="h-2" />
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
           <div className="flex items-center gap-2">
             <BookOpen className="text-accent" size={24} />
-            <h3 className="font-semibold text-lg">Interactive Lessons</h3>
+            <h3 className="text-lg font-semibold">Interactive Lessons</h3>
           </div>
 
           <div className="space-y-3">
             {LESSONS.map((lesson, index) => {
-              const Icon = lesson.icon
-              const isCompleted = completedLessons.includes(lesson.id)
-              const isSelected = selectedLesson === lesson.id
-              const hasQuiz = !!lesson.quiz
-              const quizPassed = quizScores[lesson.id]
+              const Icon = lesson.icon;
+              const isCompleted = completedLessons.includes(lesson.id);
+              const isSelected = selectedLesson === lesson.id;
+              const hasQuiz = !!lesson.quiz;
+              const quizPassed = quizScores[lesson.id];
 
               return (
                 <motion.div
@@ -379,35 +419,39 @@ export function LearningResources() {
                   transition={{ delay: index * 0.05 }}
                 >
                   <Card
-                    className={`p-4 cursor-pointer transition-all hover:shadow-lg hover:shadow-primary/20 ${
-                      isSelected ? 'border-accent shadow-lg shadow-accent/20' : 'border-border hover:border-accent/50'
+                    className={`hover:shadow-primary/20 cursor-pointer p-4 transition-all hover:shadow-lg ${
+                      isSelected
+                        ? 'border-accent shadow-accent/20 shadow-lg'
+                        : 'border-border hover:border-accent/50'
                     }`}
                     onClick={() => {
-                      setSelectedLesson(isSelected ? null : lesson.id)
-                      resetQuiz()
+                      setSelectedLesson(isSelected ? null : lesson.id);
+                      resetQuiz();
                     }}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        isCompleted ? 'bg-accent/20' : 'bg-muted'
-                      }`}>
-                        <Icon className={isCompleted ? 'text-accent' : 'text-muted-foreground'} size={20} weight={isCompleted ? 'fill' : 'regular'} />
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-medium">{lesson.title}</h4>
-                          {hasQuiz && (
-                            <Brain className="text-primary" size={16} />
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{lesson.description}</p>
+                      <div
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${
+                          isCompleted ? 'bg-accent/20' : 'bg-muted'
+                        }`}
+                      >
+                        <Icon
+                          className={isCompleted ? 'text-accent' : 'text-muted-foreground'}
+                          size={20}
+                          weight={isCompleted ? 'fill' : 'regular'}
+                        />
                       </div>
 
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {quizPassed && (
-                          <Star className="text-accent" size={20} weight="fill" />
-                        )}
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center gap-2">
+                          <h4 className="font-medium">{lesson.title}</h4>
+                          {hasQuiz && <Brain className="text-primary" size={16} />}
+                        </div>
+                        <p className="text-muted-foreground text-sm">{lesson.description}</p>
+                      </div>
+
+                      <div className="flex flex-shrink-0 items-center gap-2">
+                        {quizPassed && <Star className="text-accent" size={20} weight="fill" />}
                         {isCompleted ? (
                           <CheckCircle className="text-accent" size={24} weight="fill" />
                         ) : (
@@ -422,30 +466,32 @@ export function LearningResources() {
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: 'auto' }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="mt-4 pt-4 border-t border-border"
+                          className="border-border mt-4 border-t pt-4"
                         >
-                          <div className="prose prose-sm max-w-none mb-4">
-                            <div className="whitespace-pre-line text-sm text-foreground leading-relaxed">
+                          <div className="prose prose-sm mb-4 max-w-none">
+                            <div className="text-foreground text-sm leading-relaxed whitespace-pre-line">
                               {currentLesson.content}
                             </div>
                           </div>
 
                           {currentLesson.quiz && (
-                            <Card className="p-4 bg-primary/5 border-primary/20">
-                              <div className="flex items-center gap-2 mb-3">
+                            <Card className="bg-primary/5 border-primary/20 p-4">
+                              <div className="mb-3 flex items-center gap-2">
                                 <Brain className="text-primary" size={20} weight="fill" />
-                                <h5 className="font-semibold text-sm">Knowledge Check</h5>
+                                <h5 className="text-sm font-semibold">Knowledge Check</h5>
                               </div>
-                              
-                              <p className="text-sm font-medium mb-3">{currentLesson.quiz.question}</p>
-                              
-                              <div className="space-y-2 mb-4">
+
+                              <p className="mb-3 text-sm font-medium">
+                                {currentLesson.quiz.question}
+                              </p>
+
+                              <div className="mb-4 space-y-2">
                                 {currentLesson.quiz.options.map((option, idx) => (
                                   <button
                                     key={idx}
                                     onClick={() => setSelectedAnswer(idx)}
                                     disabled={showExplanation}
-                                    className={`w-full text-left p-3 rounded-lg border text-sm transition-all ${
+                                    className={`w-full rounded-lg border p-3 text-left text-sm transition-all ${
                                       selectedAnswer === idx
                                         ? showExplanation
                                           ? idx === currentLesson.quiz!.correctAnswer
@@ -464,10 +510,14 @@ export function LearningResources() {
                                 <motion.div
                                   initial={{ opacity: 0, y: -10 }}
                                   animate={{ opacity: 1, y: 0 }}
-                                  className="p-3 bg-accent/10 border border-accent/30 rounded-lg mb-3"
+                                  className="bg-accent/10 border-accent/30 mb-3 rounded-lg border p-3"
                                 >
                                   <div className="flex items-start gap-2">
-                                    <Lightbulb className="text-accent flex-shrink-0 mt-0.5" size={18} weight="fill" />
+                                    <Lightbulb
+                                      className="text-accent mt-0.5 flex-shrink-0"
+                                      size={18}
+                                      weight="fill"
+                                    />
                                     <p className="text-sm">{currentLesson.quiz.explanation}</p>
                                   </div>
                                 </motion.div>
@@ -481,7 +531,7 @@ export function LearningResources() {
                                         handleQuizSubmit(
                                           currentLesson.id,
                                           selectedAnswer === currentLesson.quiz!.correctAnswer
-                                        )
+                                        );
                                       }
                                     }}
                                     disabled={selectedAnswer === null}
@@ -519,7 +569,7 @@ export function LearningResources() {
                           {!currentLesson.quiz && !isCompleted && (
                             <Button
                               onClick={() => handleLessonComplete(currentLesson.id)}
-                              className="w-full mt-2"
+                              className="mt-2 w-full"
                               size="sm"
                             >
                               <CheckCircle size={16} weight="fill" className="mr-1" />
@@ -531,101 +581,116 @@ export function LearningResources() {
                     </AnimatePresence>
                   </Card>
                 </motion.div>
-              )
+              );
             })}
           </div>
         </div>
 
         <div className="space-y-4">
-          <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
-            <div className="flex items-start gap-3 mb-4">
-              <Sparkle className="text-accent flex-shrink-0 mt-1" size={24} weight="fill" />
+          <Card className="from-primary/10 to-accent/10 border-primary/30 bg-gradient-to-br p-4">
+            <div className="mb-4 flex items-start gap-3">
+              <Sparkle className="text-accent mt-1 flex-shrink-0" size={24} weight="fill" />
               <div>
-                <h3 className="font-semibold mb-1">Quick Tips</h3>
-                <p className="text-xs text-muted-foreground">Pro tips to accelerate learning</p>
+                <h3 className="mb-1 font-semibold">Quick Tips</h3>
+                <p className="text-muted-foreground text-xs">Pro tips to accelerate learning</p>
               </div>
             </div>
             <ul className="space-y-2">
               {QUICK_TIPS.map((tip, index) => (
                 <li key={index} className="flex items-start gap-2 text-xs">
-                  <ArrowRight className="text-accent flex-shrink-0 mt-0.5" size={14} />
+                  <ArrowRight className="text-accent mt-0.5 flex-shrink-0" size={14} />
                   <span>{tip}</span>
                 </li>
               ))}
             </ul>
           </Card>
 
-          <Card className="p-4 bg-muted/50">
-            <h3 className="font-semibold mb-3 text-sm">Key Concepts</h3>
+          <Card className="bg-muted/50 p-4">
+            <h3 className="mb-3 text-sm font-semibold">Key Concepts</h3>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="pipeline">
-                <AccordionTrigger className="text-sm py-2">Pipeline</AccordionTrigger>
-                <AccordionContent className="text-xs text-muted-foreground">
-                  A high-level API that groups together a model with its preprocessing and postprocessing steps.
+                <AccordionTrigger className="py-2 text-sm">Pipeline</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-xs">
+                  A high-level API that groups together a model with its preprocessing and
+                  postprocessing steps.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="tokenizer">
-                <AccordionTrigger className="text-sm py-2">Tokenizer</AccordionTrigger>
-                <AccordionContent className="text-xs text-muted-foreground">
-                  Converts text into numbers (tokens) that models can understand. Each model has its own tokenizer.
+                <AccordionTrigger className="py-2 text-sm">Tokenizer</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-xs">
+                  Converts text into numbers (tokens) that models can understand. Each model has its
+                  own tokenizer.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="fine-tuning">
-                <AccordionTrigger className="text-sm py-2">Fine-tuning</AccordionTrigger>
-                <AccordionContent className="text-xs text-muted-foreground">
-                  Training a pre-trained model further on your specific dataset. Much faster than training from scratch.
+                <AccordionTrigger className="py-2 text-sm">Fine-tuning</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-xs">
+                  Training a pre-trained model further on your specific dataset. Much faster than
+                  training from scratch.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="model-card">
-                <AccordionTrigger className="text-sm py-2">Model Card</AccordionTrigger>
-                <AccordionContent className="text-xs text-muted-foreground">
-                  Documentation describing training data, intended use, limitations, and performance metrics.
+                <AccordionTrigger className="py-2 text-sm">Model Card</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground text-xs">
+                  Documentation describing training data, intended use, limitations, and performance
+                  metrics.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
           </Card>
 
           <div className="grid grid-cols-1 gap-3">
-            <Card className="p-3 text-center bg-primary/10 border-primary/30">
-              <div className="text-2xl font-bold text-accent mb-0.5">130K+</div>
-              <div className="text-xs text-muted-foreground">Models</div>
+            <Card className="bg-primary/10 border-primary/30 p-3 text-center">
+              <div className="text-accent mb-0.5 text-2xl font-bold">130K+</div>
+              <div className="text-muted-foreground text-xs">Models</div>
             </Card>
-            <Card className="p-3 text-center bg-accent/10 border-accent/30">
-              <div className="text-2xl font-bold text-accent mb-0.5">75K+</div>
-              <div className="text-xs text-muted-foreground">Datasets</div>
+            <Card className="bg-accent/10 border-accent/30 p-3 text-center">
+              <div className="text-accent mb-0.5 text-2xl font-bold">75K+</div>
+              <div className="text-muted-foreground text-xs">Datasets</div>
             </Card>
-            <Card className="p-3 text-center bg-primary/10 border-primary/30">
-              <div className="text-2xl font-bold text-accent mb-0.5">10M+</div>
-              <div className="text-xs text-muted-foreground">Users</div>
+            <Card className="bg-primary/10 border-primary/30 p-3 text-center">
+              <div className="text-accent mb-0.5 text-2xl font-bold">10M+</div>
+              <div className="text-muted-foreground text-xs">Users</div>
             </Card>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {RESOURCES.map((resource, index) => {
-          const Icon = resource.icon
+          const Icon = resource.icon;
           return (
             <Card
               key={index}
-              className="p-4 hover:shadow-lg hover:shadow-primary/20 transition-all hover:-translate-y-1 border-border hover:border-accent/50"
+              className="hover:shadow-primary/20 border-border hover:border-accent/50 p-4 transition-all hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="flex items-start gap-3 mb-3">
+              <div className="mb-3 flex items-start gap-3">
                 <Icon className="text-accent flex-shrink-0" size={24} />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="mb-1 flex items-center gap-2">
                     <h3 className="font-medium">{resource.title}</h3>
                   </div>
-                  <Badge variant="outline" className="text-xs mb-2">
+                  <Badge variant="outline" className="mb-2 text-xs">
                     {resource.category}
                   </Badge>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">{resource.description}</p>
+              <p className="text-muted-foreground mb-3 text-sm">{resource.description}</p>
+              {resource.link && (
+                <a
+                  href={resource.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent inline-flex items-center gap-1 text-sm hover:underline"
+                >
+                  Read documentation
+                  <ArrowRight size={14} />
+                </a>
+              )}
             </Card>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
