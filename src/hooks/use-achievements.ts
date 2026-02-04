@@ -1,29 +1,29 @@
-import { useKV } from '@github/spark/hooks'
-import { useCallback, useEffect } from 'react'
-import { toast } from 'sonner'
+import { useCallback, useEffect } from 'react';
+import { toast } from 'sonner';
+import { useLocalStorage } from './use-local-storage';
 
 export interface Achievement {
-  id: string
-  name: string
-  description: string
-  icon: string
-  category: 'explorer' | 'learner' | 'experimenter' | 'master' | 'streak'
-  unlockedAt?: number
-  progress: number
-  requirement: number
-  tier: 'bronze' | 'silver' | 'gold' | 'platinum'
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: 'explorer' | 'learner' | 'experimenter' | 'master' | 'streak';
+  unlockedAt?: number;
+  progress: number;
+  requirement: number;
+  tier: 'bronze' | 'silver' | 'gold' | 'platinum';
 }
 
 export interface UserStats {
-  totalPlaygroundRuns: number
-  totalFavorites: number
-  lessonsCompleted: number
-  quizzesPassed: number
-  modelComparisons: number
-  daysActive: number[]
-  currentStreak: number
-  longestStreak: number
-  lastActiveDate: string
+  totalPlaygroundRuns: number;
+  totalFavorites: number;
+  lessonsCompleted: number;
+  quizzesPassed: number;
+  modelComparisons: number;
+  daysActive: number[];
+  currentStreak: number;
+  longestStreak: number;
+  lastActiveDate: string;
 }
 
 const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
@@ -34,7 +34,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'GraduationCap',
     category: 'learner',
     requirement: 1,
-    tier: 'bronze'
+    tier: 'bronze',
   },
   {
     id: 'knowledge-seeker',
@@ -43,7 +43,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Book',
     category: 'learner',
     requirement: 3,
-    tier: 'silver'
+    tier: 'silver',
   },
   {
     id: 'scholar',
@@ -52,7 +52,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'BookOpen',
     category: 'learner',
     requirement: 5,
-    tier: 'gold'
+    tier: 'gold',
   },
   {
     id: 'quiz-master',
@@ -61,7 +61,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Brain',
     category: 'learner',
     requirement: 5,
-    tier: 'platinum'
+    tier: 'platinum',
   },
   {
     id: 'first-experiment',
@@ -70,7 +70,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Flask',
     category: 'experimenter',
     requirement: 1,
-    tier: 'bronze'
+    tier: 'bronze',
   },
   {
     id: 'api-explorer',
@@ -79,7 +79,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Cpu',
     category: 'experimenter',
     requirement: 10,
-    tier: 'silver'
+    tier: 'silver',
   },
   {
     id: 'power-user',
@@ -88,7 +88,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Lightning',
     category: 'experimenter',
     requirement: 50,
-    tier: 'gold'
+    tier: 'gold',
   },
   {
     id: 'api-master',
@@ -97,7 +97,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Crown',
     category: 'experimenter',
     requirement: 100,
-    tier: 'platinum'
+    tier: 'platinum',
   },
   {
     id: 'collector',
@@ -106,7 +106,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Heart',
     category: 'explorer',
     requirement: 5,
-    tier: 'bronze'
+    tier: 'bronze',
   },
   {
     id: 'curator',
@@ -115,7 +115,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Star',
     category: 'explorer',
     requirement: 15,
-    tier: 'silver'
+    tier: 'silver',
   },
   {
     id: 'comparison-expert',
@@ -124,7 +124,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'ArrowsLeftRight',
     category: 'explorer',
     requirement: 5,
-    tier: 'silver'
+    tier: 'silver',
   },
   {
     id: 'early-bird',
@@ -133,7 +133,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Fire',
     category: 'streak',
     requirement: 3,
-    tier: 'bronze'
+    tier: 'bronze',
   },
   {
     id: 'dedicated',
@@ -142,7 +142,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Flame',
     category: 'streak',
     requirement: 7,
-    tier: 'silver'
+    tier: 'silver',
   },
   {
     id: 'unstoppable',
@@ -151,7 +151,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Lightning',
     category: 'streak',
     requirement: 14,
-    tier: 'gold'
+    tier: 'gold',
   },
   {
     id: 'legendary',
@@ -160,7 +160,7 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Crown',
     category: 'streak',
     requirement: 30,
-    tier: 'platinum'
+    tier: 'platinum',
   },
   {
     id: 'perfectionist',
@@ -169,242 +169,190 @@ const ACHIEVEMENTS: Omit<Achievement, 'unlockedAt' | 'progress'>[] = [
     icon: 'Target',
     category: 'master',
     requirement: 1,
-    tier: 'platinum'
-  }
-]
+    tier: 'platinum',
+  },
+];
+
+const DEFAULT_STATS: UserStats = {
+  totalPlaygroundRuns: 0,
+  totalFavorites: 0,
+  lessonsCompleted: 0,
+  quizzesPassed: 0,
+  modelComparisons: 0,
+  daysActive: [],
+  currentStreak: 0,
+  longestStreak: 0,
+  lastActiveDate: '',
+};
 
 export function useAchievements() {
-  const [achievements = [], setAchievements] = useKV<Achievement[]>('user-achievements', [])
-  const [stats = {
-    totalPlaygroundRuns: 0,
-    totalFavorites: 0,
-    lessonsCompleted: 0,
-    quizzesPassed: 0,
-    modelComparisons: 0,
-    daysActive: [],
-    currentStreak: 0,
-    longestStreak: 0,
-    lastActiveDate: ''
-  }, setStats] = useKV<UserStats>('user-stats', {
-    totalPlaygroundRuns: 0,
-    totalFavorites: 0,
-    lessonsCompleted: 0,
-    quizzesPassed: 0,
-    modelComparisons: 0,
-    daysActive: [],
-    currentStreak: 0,
-    longestStreak: 0,
-    lastActiveDate: ''
-  })
+  const [achievements, setAchievements] = useLocalStorage<Achievement[]>('user-achievements', []);
+  const [stats, setStats] = useLocalStorage<UserStats>('user-stats', DEFAULT_STATS);
 
   const initializeAchievements = useCallback(() => {
-    setAchievements((current = []) => {
-      if (current.length === 0) {
-        return ACHIEVEMENTS.map(a => ({
+    setAchievements((current) => {
+      if (!current || current.length === 0) {
+        return ACHIEVEMENTS.map((a) => ({
           ...a,
-          progress: 0
-        }))
+          progress: 0,
+        }));
       }
-      return current
-    })
-  }, [setAchievements])
+      return current;
+    });
+  }, [setAchievements]);
 
   useEffect(() => {
-    initializeAchievements()
-  }, [initializeAchievements])
+    initializeAchievements();
+  }, [initializeAchievements]);
 
   const updateStreak = useCallback(() => {
-    const today = new Date().toDateString()
-    
-    setStats((current = {
-      totalPlaygroundRuns: 0,
-      totalFavorites: 0,
-      lessonsCompleted: 0,
-      quizzesPassed: 0,
-      modelComparisons: 0,
-      daysActive: [],
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActiveDate: ''
-    }) => {
-      if (current.lastActiveDate === today) {
-        return current
+    const today = new Date().toDateString();
+
+    setStats((current) => {
+      const c = current || DEFAULT_STATS;
+      if (c.lastActiveDate === today) {
+        return c;
       }
 
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDate() - 1)
-      const yesterdayStr = yesterday.toDateString()
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toDateString();
 
-      const newDaysActive = [...(current.daysActive || []), Date.now()]
-      let newStreak = current.currentStreak || 0
+      const newDaysActive = [...(c.daysActive || []), Date.now()];
+      let newStreak = c.currentStreak || 0;
 
-      if (current.lastActiveDate === yesterdayStr) {
-        newStreak += 1
-      } else if (current.lastActiveDate !== today) {
-        newStreak = 1
+      if (c.lastActiveDate === yesterdayStr) {
+        newStreak += 1;
+      } else if (c.lastActiveDate !== today) {
+        newStreak = 1;
       }
 
-      const newLongestStreak = Math.max(newStreak, current.longestStreak || 0)
+      const newLongestStreak = Math.max(newStreak, c.longestStreak || 0);
 
       return {
-        ...current,
+        ...c,
         daysActive: newDaysActive,
         currentStreak: newStreak,
         longestStreak: newLongestStreak,
-        lastActiveDate: today
-      }
-    })
-  }, [setStats])
+        lastActiveDate: today,
+      };
+    });
+  }, [setStats]);
 
-  const checkAndUnlockAchievement = useCallback((achievementId: string, currentProgress: number) => {
-    setAchievements((current = []) => {
-      const achievement = current.find(a => a.id === achievementId)
-      if (!achievement) return current
+  const checkAndUnlockAchievement = useCallback(
+    (achievementId: string, currentProgress: number) => {
+      setAchievements((current) => {
+        const arr = current || [];
+        const achievement = arr.find((a) => a.id === achievementId);
+        if (!achievement) return arr;
 
-      if (achievement.unlockedAt) return current
+        if (achievement.unlockedAt) return arr;
 
-      if (currentProgress >= achievement.requirement) {
-        const unlocked = current.map(a =>
-          a.id === achievementId
-            ? { ...a, progress: currentProgress, unlockedAt: Date.now() }
-            : a
-        )
+        if (currentProgress >= achievement.requirement) {
+          const unlocked = arr.map((a) =>
+            a.id === achievementId ? { ...a, progress: currentProgress, unlockedAt: Date.now() } : a
+          );
 
-        toast.success('Achievement Unlocked!', {
-          description: `${achievement.name} - ${achievement.description}`,
-          duration: 5000
-        })
+          toast.success('Achievement Unlocked!', {
+            description: `${achievement.name} - ${achievement.description}`,
+            duration: 5000,
+          });
 
-        return unlocked
-      }
+          return unlocked;
+        }
 
-      return current.map(a =>
-        a.id === achievementId
-          ? { ...a, progress: currentProgress }
-          : a
-      )
-    })
-  }, [setAchievements])
+        return arr.map((a) => (a.id === achievementId ? { ...a, progress: currentProgress } : a));
+      });
+    },
+    [setAchievements]
+  );
 
   const trackPlaygroundRun = useCallback(() => {
-    updateStreak()
-    setStats((current = {
-      totalPlaygroundRuns: 0,
-      totalFavorites: 0,
-      lessonsCompleted: 0,
-      quizzesPassed: 0,
-      modelComparisons: 0,
-      daysActive: [],
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActiveDate: ''
-    }) => {
-      const newCount = (current.totalPlaygroundRuns || 0) + 1
-      checkAndUnlockAchievement('first-experiment', newCount)
-      checkAndUnlockAchievement('api-explorer', newCount)
-      checkAndUnlockAchievement('power-user', newCount)
-      checkAndUnlockAchievement('api-master', newCount)
-      
-      return { ...current, totalPlaygroundRuns: newCount }
-    })
-  }, [setStats, updateStreak, checkAndUnlockAchievement])
+    updateStreak();
+    setStats((current) => {
+      const c = current || DEFAULT_STATS;
+      const newCount = (c.totalPlaygroundRuns || 0) + 1;
+      checkAndUnlockAchievement('first-experiment', newCount);
+      checkAndUnlockAchievement('api-explorer', newCount);
+      checkAndUnlockAchievement('power-user', newCount);
+      checkAndUnlockAchievement('api-master', newCount);
 
-  const trackFavorite = useCallback((count: number) => {
-    setStats((current = {
-      totalPlaygroundRuns: 0,
-      totalFavorites: 0,
-      lessonsCompleted: 0,
-      quizzesPassed: 0,
-      modelComparisons: 0,
-      daysActive: [],
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActiveDate: ''
-    }) => {
-      checkAndUnlockAchievement('collector', count)
-      checkAndUnlockAchievement('curator', count)
-      
-      return { ...current, totalFavorites: count }
-    })
-  }, [setStats, checkAndUnlockAchievement])
+      return { ...c, totalPlaygroundRuns: newCount };
+    });
+  }, [setStats, updateStreak, checkAndUnlockAchievement]);
 
-  const trackLessonComplete = useCallback((count: number) => {
-    updateStreak()
-    setStats((current = {
-      totalPlaygroundRuns: 0,
-      totalFavorites: 0,
-      lessonsCompleted: 0,
-      quizzesPassed: 0,
-      modelComparisons: 0,
-      daysActive: [],
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActiveDate: ''
-    }) => {
-      checkAndUnlockAchievement('first-steps', count)
-      checkAndUnlockAchievement('knowledge-seeker', count)
-      checkAndUnlockAchievement('scholar', count)
-      
-      return { ...current, lessonsCompleted: count }
-    })
-  }, [setStats, updateStreak, checkAndUnlockAchievement])
+  const trackFavorite = useCallback(
+    (count: number) => {
+      setStats((current) => {
+        const c = current || DEFAULT_STATS;
+        checkAndUnlockAchievement('collector', count);
+        checkAndUnlockAchievement('curator', count);
 
-  const trackQuizPass = useCallback((count: number) => {
-    setStats((current = {
-      totalPlaygroundRuns: 0,
-      totalFavorites: 0,
-      lessonsCompleted: 0,
-      quizzesPassed: 0,
-      modelComparisons: 0,
-      daysActive: [],
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActiveDate: ''
-    }) => {
-      checkAndUnlockAchievement('quiz-master', count)
-      
-      return { ...current, quizzesPassed: count }
-    })
-  }, [setStats, checkAndUnlockAchievement])
+        return { ...c, totalFavorites: count };
+      });
+    },
+    [setStats, checkAndUnlockAchievement]
+  );
+
+  const trackLessonComplete = useCallback(
+    (count: number) => {
+      updateStreak();
+      setStats((current) => {
+        const c = current || DEFAULT_STATS;
+        checkAndUnlockAchievement('first-steps', count);
+        checkAndUnlockAchievement('knowledge-seeker', count);
+        checkAndUnlockAchievement('scholar', count);
+
+        return { ...c, lessonsCompleted: count };
+      });
+    },
+    [setStats, updateStreak, checkAndUnlockAchievement]
+  );
+
+  const trackQuizPass = useCallback(
+    (count: number) => {
+      setStats((current) => {
+        const c = current || DEFAULT_STATS;
+        checkAndUnlockAchievement('quiz-master', count);
+
+        return { ...c, quizzesPassed: count };
+      });
+    },
+    [setStats, checkAndUnlockAchievement]
+  );
 
   const trackComparison = useCallback(() => {
-    setStats((current = {
-      totalPlaygroundRuns: 0,
-      totalFavorites: 0,
-      lessonsCompleted: 0,
-      quizzesPassed: 0,
-      modelComparisons: 0,
-      daysActive: [],
-      currentStreak: 0,
-      longestStreak: 0,
-      lastActiveDate: ''
-    }) => {
-      const newCount = (current.modelComparisons || 0) + 1
-      checkAndUnlockAchievement('comparison-expert', newCount)
-      
-      return { ...current, modelComparisons: newCount }
-    })
-  }, [setStats, checkAndUnlockAchievement])
+    setStats((current) => {
+      const c = current || DEFAULT_STATS;
+      const newCount = (c.modelComparisons || 0) + 1;
+      checkAndUnlockAchievement('comparison-expert', newCount);
+
+      return { ...c, modelComparisons: newCount };
+    });
+  }, [setStats, checkAndUnlockAchievement]);
 
   useEffect(() => {
-    const streak = stats.currentStreak || 0
-    checkAndUnlockAchievement('early-bird', streak)
-    checkAndUnlockAchievement('dedicated', streak)
-    checkAndUnlockAchievement('unstoppable', streak)
-    checkAndUnlockAchievement('legendary', streak)
-  }, [stats.currentStreak, checkAndUnlockAchievement])
+    const streak = stats.currentStreak || 0;
+    checkAndUnlockAchievement('early-bird', streak);
+    checkAndUnlockAchievement('dedicated', streak);
+    checkAndUnlockAchievement('unstoppable', streak);
+    checkAndUnlockAchievement('legendary', streak);
+  }, [stats.currentStreak, checkAndUnlockAchievement]);
 
   const getUnlockedCount = useCallback(() => {
-    return achievements.filter(a => a.unlockedAt).length
-  }, [achievements])
+    return achievements.filter((a) => a.unlockedAt).length;
+  }, [achievements]);
 
   const getTotalCount = useCallback(() => {
-    return ACHIEVEMENTS.length
-  }, [])
+    return ACHIEVEMENTS.length;
+  }, []);
 
-  const getAchievementsByCategory = useCallback((category: Achievement['category']) => {
-    return achievements.filter(a => a.category === category)
-  }, [achievements])
+  const getAchievementsByCategory = useCallback(
+    (category: Achievement['category']) => {
+      return achievements.filter((a) => a.category === category);
+    },
+    [achievements]
+  );
 
   return {
     achievements,
@@ -417,6 +365,6 @@ export function useAchievements() {
     updateStreak,
     getUnlockedCount,
     getTotalCount,
-    getAchievementsByCategory
-  }
+    getAchievementsByCategory,
+  };
 }

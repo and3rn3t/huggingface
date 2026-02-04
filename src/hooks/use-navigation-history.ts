@@ -1,5 +1,5 @@
-import { useKV } from '@github/spark/hooks'
 import { useEffect, useCallback } from 'react'
+import { useLocalStorage } from './use-local-storage'
 
 interface NavigationHistoryEntry {
   tab: string
@@ -7,7 +7,7 @@ interface NavigationHistoryEntry {
 }
 
 export function useNavigationHistory() {
-  const [history, setHistory] = useKV<NavigationHistoryEntry[]>('navigation-history', [])
+  const [history, setHistory] = useLocalStorage<NavigationHistoryEntry[]>('navigation-history', [])
 
   const pushToHistory = useCallback((tab: string) => {
     setHistory((current = []) => {

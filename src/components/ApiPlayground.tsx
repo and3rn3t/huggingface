@@ -15,7 +15,7 @@ import {
   Brain, Cpu, CloudArrowDown, CheckCircle
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { useKV } from '@github/spark/hooks'
+import { useLocalStorage } from '@/hooks/use-local-storage'
 import { useAchievements } from '@/hooks/use-achievements'
 import { motion } from 'framer-motion'
 import { 
@@ -146,8 +146,8 @@ export function ApiPlayground() {
   const [topP, setTopP] = useState([0.9])
   const [showAdvanced, setShowAdvanced] = useState(false)
 
-  const [history = [], setHistory] = useKV<HistoryItem[]>('playground-history', [])
-  const [savedPrompts = [], setSavedPrompts] = useKV<{ id: string; name: string; taskId: string; prompt: string }[]>('saved-prompts', [])
+  const [history, setHistory] = useLocalStorage<HistoryItem[]>('playground-history', [])
+  const [savedPrompts, setSavedPrompts] = useLocalStorage<{ id: string; name: string; taskId: string; prompt: string }[]>('saved-prompts', [])
   
   const { trackPlaygroundRun } = useAchievements()
   const { showError } = useApiError()

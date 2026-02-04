@@ -1,5 +1,5 @@
-import { useKV } from '@github/spark/hooks'
 import { useCallback } from 'react'
+import { useLocalStorage } from './use-local-storage'
 
 export interface FavoriteItem {
   id: string
@@ -10,7 +10,7 @@ export interface FavoriteItem {
 }
 
 export function useFavorites() {
-  const [favorites, setFavorites] = useKV<FavoriteItem[]>('hf-favorites', [])
+  const [favorites, setFavorites] = useLocalStorage<FavoriteItem[]>('hf-favorites', [])
 
   const addFavorite = useCallback((id: string, type: 'dataset' | 'model', name: string) => {
     setFavorites((current = []) => {

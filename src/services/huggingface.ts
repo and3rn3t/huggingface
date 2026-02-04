@@ -317,7 +317,7 @@ export async function searchModels(params: HFModelSearchParams = {}): Promise<HF
   if (params.pipeline_tag) searchParams.set('pipeline_tag', params.pipeline_tag);
   if (params.library) searchParams.set('library', params.library);
   if (params.sort) searchParams.set('sort', params.sort);
-  if (params.direction) searchParams.set('direction', params.direction === 'asc' ? '-1' : '1');
+  if (params.direction) searchParams.set('direction', params.direction === 'desc' ? '-1' : '1');
   if (params.limit) searchParams.set('limit', params.limit.toString());
   if (params.offset) searchParams.set('offset', params.offset.toString());
 
@@ -365,7 +365,7 @@ export async function searchDatasets(params: HFDatasetSearchParams = {}): Promis
   if (params.language) searchParams.set('language', params.language);
   if (params.size_categories) searchParams.set('size_categories', params.size_categories);
   if (params.sort) searchParams.set('sort', params.sort);
-  if (params.direction) searchParams.set('direction', params.direction === 'asc' ? '-1' : '1');
+  if (params.direction) searchParams.set('direction', params.direction === 'desc' ? '-1' : '1');
   if (params.limit) searchParams.set('limit', params.limit.toString());
   if (params.offset) searchParams.set('offset', params.offset.toString());
 
