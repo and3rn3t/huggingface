@@ -69,11 +69,11 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Success criteria**: Users understand their progress, feel motivated to unlock achievements, maintain learning streaks, and engage more frequently with the platform due to gamification elements
 
 ### Optimized Navigation System
-- **Functionality**: Grouped, hierarchical navigation with three categories (Discover, Tools, Personal); keyboard-driven command palette (Cmd/Ctrl+K); breadcrumb trail showing current location; responsive mobile drawer menu; visual grouping with separators
-- **Purpose**: Enable faster navigation between sections, reduce cognitive load with logical grouping, provide power user shortcuts, improve mobile UX with dedicated menu, and enhance context awareness
-- **Trigger**: User clicks navigation items, uses keyboard shortcut Cmd/Ctrl+K, or opens mobile menu; breadcrumb updates automatically based on current page
-- **Progression**: Desktop: Click grouped navigation items → Active state shows accent color → Quick access via keyboard shortcut | Mobile: Tap menu icon → View grouped categories in drawer → Select destination → Menu closes automatically | All: Use Cmd/Ctrl+K → Type to search navigation → Select from filtered results
-- **Success criteria**: Users navigate between sections faster, understand where they are in the app via breadcrumbs, power users adopt keyboard shortcuts, mobile users find navigation intuitive, and overall navigation feels organized and efficient
+- **Functionality**: Grouped, hierarchical navigation with three categories (Discover, Tools, Personal); keyboard-driven command palette (Cmd/Ctrl+K); breadcrumb trail showing current location with back button; browser-style back navigation (Cmd/Ctrl+[); responsive mobile drawer menu; visual grouping with separators; intelligent navigation history tracking
+- **Purpose**: Enable faster navigation between sections, reduce cognitive load with logical grouping, provide power user shortcuts, improve mobile UX with dedicated menu, enhance context awareness, and support intuitive back navigation between related pages
+- **Trigger**: User clicks navigation items, uses keyboard shortcut Cmd/Ctrl+K, or opens mobile menu; breadcrumb updates automatically based on current page; back button appears when navigation history exists; keyboard shortcut Cmd/Ctrl+[ for going back
+- **Progression**: Desktop: Click grouped navigation items → Active state shows accent color → Quick access via keyboard shortcut | Mobile: Tap menu icon → View grouped categories in drawer → Select destination → Menu closes automatically | All: Use Cmd/Ctrl+K → Type to search navigation → Select from filtered results | Back Navigation: Click back button in breadcrumb → Return to previous page → History preserved across sessions → Keyboard shortcut Cmd/Ctrl+[ for quick back navigation
+- **Success criteria**: Users navigate between sections faster, understand where they are in the app via breadcrumbs, can easily return to previous pages with back button or keyboard shortcut, power users adopt keyboard shortcuts, mobile users find navigation intuitive, navigation history persists across sessions, and overall navigation feels organized and efficient
 
 
 ## Edge Case Handling
@@ -92,6 +92,9 @@ This is a learning-focused tool with several distinct features (dataset browser,
 - **Achievement Progress Reset**: Protect achievement progress from accidental deletion; provide clear information about what actions unlock which achievements
 - **Streak Breaking**: Show encouraging messages when streaks are broken; motivate users to restart their learning journey
 - **First-Time Achievement Unlocks**: Celebrate unlocking achievements with satisfying toast notifications and visual feedback
+- **Navigation History Limit**: Keep only last 20 navigation entries to prevent excessive storage usage
+- **No Navigation History**: Hide back button when user is at the beginning of their navigation session
+- **Circular Navigation**: Handle scenarios where user navigates in circles without cluttering history
 
 ## Design Direction
 
@@ -134,7 +137,8 @@ Animations should feel responsive and data-driven, like information flowing thro
 - **Components**: 
   - Grouped navigation with visual separators for Discover, Tools, and Personal sections
   - Command palette (Cmd/Ctrl+K) for quick navigation between sections
-  - Breadcrumb navigation for context awareness
+  - Breadcrumb navigation for context awareness with integrated back button
+  - Back button with tooltip showing destination and keyboard shortcut support (Cmd/Ctrl+[)
   - Sheet (drawer) for mobile navigation menu
   - Tabs for main navigation between Trending, Dataset Browser, Model Explorer, Compare, Favorites, API Playground, and Learn sections
   - Card components for dataset/model listings with hover states
@@ -145,7 +149,7 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Separator for visual organization of content sections
   - Skeleton for loading states
   - Toast (sonner) for API success/error feedback
-  - Button with multiple variants (default for primary actions, outline for secondary, ghost for tertiary)
+  - Button with multiple variants (default for primary actions, outline for secondary, ghost for tertiary, ghost for back button)
   - Textarea for API playground input fields and note editing
 - **Customizations**: 
   - Custom navigation component with grouped sections and responsive behavior
@@ -160,10 +164,12 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Custom note display within favorite cards with edit functionality
 - **States**: 
   - Buttons: Default has gradient purple background, hover brightens with subtle lift, active slightly compresses, focus shows cyan ring
+  - Back Button: Ghost variant with hover state that scales slightly larger and changes text color; shows tooltip with destination on hover
   - Cards: Default has dark slate background, hover lifts with deeper shadow and subtle purple glow, selected has cyan border accent
   - Inputs: Default dark background with muted border, focus shows cyan ring and border highlight, filled state shows subtle purple tint
   - Tabs: Inactive tabs are muted text, active tab has cyan accent background and bright text, grouped with visual separators
   - Navigation items: Show icon + label on desktop, collapse to icons on tablet, use drawer menu on mobile
+  - Breadcrumb: Links show hover state with accent color, current page is bold, back button only visible when history exists
 - **Icon Selection**: 
   - Database (for datasets)
   - Cpu (for models) 
@@ -175,6 +181,7 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Info (for help/explanations)
   - Sparkle (for featured/popular items)
   - ArrowRight (for navigation/next actions)
+  - ArrowLeft (for back navigation)
   - Heart (for favorites - outlined when not favorited, filled when favorited)
   - Trash (for removing favorites)
   - Fire (for trending section and active streaks)
@@ -206,7 +213,7 @@ Animations should feel responsive and data-driven, like information flowing thro
 - **Mobile**: 
   - Navigation collapses to hamburger menu with drawer on mobile, showing grouped categories
   - Active tab shown as badge-style indicator next to menu button
-  - Breadcrumb adapts to show only current page on very small screens
+  - Breadcrumb adapts to show only current page on very small screens, back button remains visible when applicable
   - Command palette available on all screen sizes with touch-friendly targets
   - Card grid changes from 3 columns (desktop) → 2 columns (tablet) → 1 column (mobile)
   - Filter panel collapses into a drawer/sheet that slides up from bottom on mobile
@@ -219,3 +226,4 @@ Animations should feel responsive and data-driven, like information flowing thro
   - Achievement cards display in single column on mobile for readability
   - Streak tracker calendar adapts to smaller size with abbreviated day names
   - Stats widget in header collapses to icons-only on very small screens
+  - Back button remains touch-friendly with adequate tap target size (44px minimum)

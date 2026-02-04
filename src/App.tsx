@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Code } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { DatasetBrowser } from '@/components/DatasetBrowser'
@@ -14,10 +14,41 @@ import { Navigation } from '@/components/Navigation'
 import { QuickNav } from '@/components/QuickNav'
 import { PageBreadcrumb } from '@/components/PageBreadcrumb'
 import { useFavorites } from '@/hooks/use-favorites'
+import { useNavigationHistory } from '@/hooks/use-navigation-history'
 
 function App() {
   const [activeTab, setActiveTab] = useState('trending')
   const { favorites = [] } = useFavorites()
+  const { pushToHistory, goBack, canGoBack, getPreviousTab } = useNavigationHistory()
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab)
+  }
+
+  const handleGoBack = () => {
+    const previousTab = goBack()
+    if (previousTab) {
+      setActiveTab(previousTab)
+    }
+  }
+
+  useEffect(() => {
+    pushToHistory(activeTab)
+  }, [activeTab, pushToHistory])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === '[') {
+        e.preventDefault()
+        if (canGoBack) {
+          handleGoBack()
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [canGoBack, handleGoBack])
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -67,7 +98,7 @@ function App() {
             <div className="mt-4">
               <Navigation 
                 activeTab={activeTab} 
-                onTabChange={setActiveTab}
+                onTabChange={handleTabChange}
                 favoritesCount={favorites.length}
               />
             </div>
@@ -76,7 +107,13 @@ function App() {
 
         <main className="container mx-auto px-4 lg:px-6 py-6 lg:py-8">
           <div className="mb-4">
-            <PageBreadcrumb activeTab={activeTab} onNavigate={setActiveTab} />
+            <PageBreadcrumb 
+              activeTab={activeTab} 
+              onNavigate={handleTabChange}
+              onGoBack={handleGoBack}
+              canGoBack={canGoBack}
+              previousTab={getPreviousTab()}
+            />
           </div>
           
           <div className="space-y-6">
@@ -99,7 +136,7 @@ function App() {
         </footer>
       </div>
 
-      <QuickNav activeTab={activeTab} onNavigate={setActiveTab} />
+      <QuickNav activeTab={activeTab} onNavigate={handleTabChange} />
       <Toaster />
     </div>
   )
