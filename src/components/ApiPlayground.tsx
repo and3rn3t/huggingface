@@ -1,25 +1,23 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { 
-  Code, Play, Copy, Sparkle, Lightning, Clock, ChartBar, 
+  Code, Play, Copy, Lightning, Clock, ChartBar,
   Image as ImageIcon, ChatCircleDots, Microphone, FileText,
   ArrowsClockwise, Download, Share, Star, Trash, MagicWand,
-  Brain, Cpu, CloudArrowDown, CheckCircle, Warning
+  Brain, Cpu, CloudArrowDown, CheckCircle
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { useAchievements } from '@/hooks/use-achievements'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { 
   generateText, 
   summarizeText, 
@@ -30,34 +28,16 @@ import {
   hasToken 
 } from '@/services/huggingface'
 import { useApiError } from '@/hooks/use-api-error'
-
-interface PlaygroundTask {
-  id: string
-  name: string
-  category: 'text' | 'vision' | 'audio' | 'multimodal'
-  description: string
-  placeholder: string
-  exampleInput: string
-  icon: React.ReactNode
-  badge?: string
-  models: string[]
-  parameters?: {
-    temperature?: boolean
-    maxTokens?: boolean
-    topP?: boolean
-  }
-}
-
-interface ExecutionHistory {
-  id: string
-  taskId: string
-  taskName: string
-  input: string
-  output: string
-  timestamp: number
-  executionTime: number
-  model: string
-}
+import {
+  TaskCard,
+  PlaygroundTask,
+  ParameterControls,
+  CodeExamples,
+  SavedPrompts,
+  ExecutionHistory,
+  HistoryItem,
+  PlaygroundStats,
+} from '@/components/playground'
 
 const PLAYGROUND_TASKS: PlaygroundTask[] = [
   {
@@ -166,7 +146,7 @@ export function ApiPlayground() {
   const [topP, setTopP] = useState([0.9])
   const [showAdvanced, setShowAdvanced] = useState(false)
 
-  const [history = [], setHistory] = useKV<ExecutionHistory[]>('playground-history', [])
+  const [history = [], setHistory] = useKV<HistoryItem[]>('playground-history', [])
   const [savedPrompts = [], setSavedPrompts] = useKV<{ id: string; name: string; taskId: string; prompt: string }[]>('saved-prompts', [])
   
   const { trackPlaygroundRun } = useAchievements()
@@ -375,70 +355,6 @@ export function ApiPlayground() {
     toast.success('Output downloaded!')
   }
 
-  const copyCode = (lang: 'python' | 'javascript' | 'curl') => {
-    const codes = {
-      python: `# HuggingFace Inference API - Python
-import requests
-
-API_URL = "https://api-inference.huggingface.co/models/${selectedModel}"
-headers = {"Authorization": "Bearer YOUR_API_TOKEN"}
-
-def query(payload):
-    response = requests.post(API_URL, headers=headers, json=payload)
-    return response.json()
-
-output = query({
-    "inputs": "${input.replace(/\n/g, '\\n').slice(0, 50)}...",
-    "parameters": {
-        "temperature": ${temperature[0]},
-        "max_new_tokens": ${maxTokens[0]},
-        "top_p": ${topP[0]}
-    }
-})
-
-print(output)`,
-      javascript: `// HuggingFace Inference API - JavaScript
-const API_URL = "https://api-inference.huggingface.co/models/${selectedModel}";
-const headers = { "Authorization": "Bearer YOUR_API_TOKEN" };
-
-async function query(data) {
-  const response = await fetch(API_URL, {
-    headers: headers,
-    method: "POST",
-    body: JSON.stringify(data)
-  });
-  return await response.json();
-}
-
-const result = await query({
-  inputs: "${input.replace(/\n/g, '\\n').slice(0, 50)}...",
-  parameters: {
-    temperature: ${temperature[0]},
-    max_new_tokens: ${maxTokens[0]},
-    top_p: ${topP[0]}
-  }
-});
-
-console.log(result);`,
-      curl: `# HuggingFace Inference API - cURL
-curl https://api-inference.huggingface.co/models/${selectedModel} \\
-  -X POST \\
-  -H "Authorization: Bearer YOUR_API_TOKEN" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "inputs": "${input.replace(/\n/g, '\\n').slice(0, 50)}...",
-    "parameters": {
-      "temperature": ${temperature[0]},
-      "max_new_tokens": ${maxTokens[0]},
-      "top_p": ${topP[0]}
-    }
-  }'`
-    }
-
-    navigator.clipboard.writeText(codes[lang])
-    toast.success(`${lang.toUpperCase()} code copied!`)
-  }
-
   const filteredTasks = PLAYGROUND_TASKS.filter(t => t.category === activeCategory)
 
   return (
@@ -487,7 +403,7 @@ curl https://api-inference.huggingface.co/models/${selectedModel} \\
         </div>
       </Card>
 
-      <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as any)} className="space-y-6">
+      <Tabs value={activeCategory} onValueChange={(v) => setActiveCategory(v as 'text' | 'vision' | 'audio' | 'multimodal')} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 bg-muted/50 p-1">
           <TabsTrigger value="text" className="gap-2">
             <FileText size={16} />
@@ -510,31 +426,12 @@ curl https://api-inference.huggingface.co/models/${selectedModel} \\
         <TabsContent value={activeCategory} className="space-y-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {filteredTasks.map((task) => (
-              <motion.div
+              <TaskCard
                 key={task.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Card
-                  className={`p-4 cursor-pointer transition-all hover:shadow-lg ${
-                    selectedTask.id === task.id
-                      ? 'border-accent bg-accent/10 shadow-accent/20'
-                      : 'hover:border-accent/50'
-                  }`}
-                  onClick={() => handleTaskChange(task.id)}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                      {task.icon}
-                    </div>
-                    {task.badge && (
-                      <Badge variant="secondary" className="text-xs">{task.badge}</Badge>
-                    )}
-                  </div>
-                  <h4 className="font-semibold text-sm mb-1">{task.name}</h4>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
-                </Card>
-              </motion.div>
+                task={task}
+                isSelected={selectedTask.id === task.id}
+                onClick={() => handleTaskChange(task.id)}
+              />
             ))}
           </div>
 
@@ -580,68 +477,16 @@ curl https://api-inference.huggingface.co/models/${selectedModel} \\
                         <Label className="text-sm font-medium">Advanced Parameters</Label>
                         <Switch checked={showAdvanced} onCheckedChange={setShowAdvanced} />
                       </div>
-                      
-                      <AnimatePresence>
-                        {showAdvanced && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="space-y-4 overflow-hidden"
-                          >
-                            {selectedTask.parameters.temperature && (
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-xs">Temperature</Label>
-                                  <span className="text-xs text-muted-foreground">{temperature[0]}</span>
-                                </div>
-                                <Slider
-                                  value={temperature}
-                                  onValueChange={setTemperature}
-                                  min={0}
-                                  max={2}
-                                  step={0.1}
-                                  className="w-full"
-                                />
-                              </div>
-                            )}
-                            
-                            {selectedTask.parameters.maxTokens && (
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-xs">Max Tokens</Label>
-                                  <span className="text-xs text-muted-foreground">{maxTokens[0]}</span>
-                                </div>
-                                <Slider
-                                  value={maxTokens}
-                                  onValueChange={setMaxTokens}
-                                  min={10}
-                                  max={500}
-                                  step={10}
-                                  className="w-full"
-                                />
-                              </div>
-                            )}
-                            
-                            {selectedTask.parameters.topP && (
-                              <div className="space-y-2">
-                                <div className="flex items-center justify-between">
-                                  <Label className="text-xs">Top P</Label>
-                                  <span className="text-xs text-muted-foreground">{topP[0]}</span>
-                                </div>
-                                <Slider
-                                  value={topP}
-                                  onValueChange={setTopP}
-                                  min={0}
-                                  max={1}
-                                  step={0.05}
-                                  className="w-full"
-                                />
-                              </div>
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                      <ParameterControls
+                        showAdvanced={showAdvanced}
+                        parameters={selectedTask.parameters}
+                        temperature={temperature}
+                        maxTokens={maxTokens}
+                        topP={topP}
+                        onTemperatureChange={setTemperature}
+                        onMaxTokensChange={setMaxTokens}
+                        onTopPChange={setTopP}
+                      />
                     </div>
                   )}
 
@@ -763,200 +608,36 @@ curl https://api-inference.huggingface.co/models/${selectedModel} \\
             </div>
 
             <div className="lg:col-span-2 space-y-4">
-              <Card className="p-4">
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <Code size={18} />
-                  API Code Examples
-                </h4>
-                <Tabs defaultValue="python" className="space-y-3">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="python">Python</TabsTrigger>
-                    <TabsTrigger value="javascript">JavaScript</TabsTrigger>
-                    <TabsTrigger value="curl">cURL</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="python" className="space-y-2">
-                    <div className="flex justify-end">
-                      <Button size="sm" variant="ghost" onClick={() => copyCode('python')}>
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                    <Card className="p-3 bg-muted">
-                      <pre className="text-xs text-accent overflow-x-auto max-h-[400px] overflow-y-auto">
-{`# Python Example
-import requests
+              <CodeExamples
+                selectedModel={selectedModel}
+                input={input}
+                temperature={temperature[0]}
+                maxTokens={maxTokens[0]}
+              />
 
-API_URL = "https://api-inference..."
-headers = {
-  "Authorization": "Bearer TOKEN"
-}
+              <SavedPrompts
+                prompts={savedPrompts}
+                onLoad={loadSavedPrompt}
+                onDelete={deleteSavedPrompt}
+              />
 
-def query(payload):
-  response = requests.post(
-    API_URL, 
-    headers=headers,
-    json=payload
-  )
-  return response.json()
+              <ExecutionHistory
+                history={history}
+                onSelect={(item) => {
+                  const task = PLAYGROUND_TASKS.find(t => t.id === item.taskId)
+                  if (task) {
+                    setSelectedTask(task)
+                    setSelectedModel(item.model)
+                    setInput(item.input)
+                    setOutput(item.output)
+                  }
+                }}
+              />
 
-output = query({
-  "inputs": "${input.slice(0, 30)}...",
-  "parameters": {
-    "temperature": ${temperature[0]},
-    "max_tokens": ${maxTokens[0]}
-  }
-})`}
-                      </pre>
-                    </Card>
-                  </TabsContent>
-                  <TabsContent value="javascript" className="space-y-2">
-                    <div className="flex justify-end">
-                      <Button size="sm" variant="ghost" onClick={() => copyCode('javascript')}>
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                    <Card className="p-3 bg-muted">
-                      <pre className="text-xs text-accent overflow-x-auto max-h-[400px] overflow-y-auto">
-{`// JavaScript Example
-const API_URL = "https://api-inference...";
-
-async function query(data) {
-  const response = await fetch(
-    API_URL, {
-      headers: {
-        Authorization: "Bearer TOKEN"
-      },
-      method: "POST",
-      body: JSON.stringify(data)
-    }
-  );
-  return await response.json();
-}
-
-const result = await query({
-  inputs: "${input.slice(0, 30)}...",
-  parameters: {
-    temperature: ${temperature[0]},
-    max_tokens: ${maxTokens[0]}
-  }
-});`}
-                      </pre>
-                    </Card>
-                  </TabsContent>
-                  <TabsContent value="curl" className="space-y-2">
-                    <div className="flex justify-end">
-                      <Button size="sm" variant="ghost" onClick={() => copyCode('curl')}>
-                        <Copy size={14} />
-                      </Button>
-                    </div>
-                    <Card className="p-3 bg-muted">
-                      <pre className="text-xs text-accent overflow-x-auto max-h-[400px] overflow-y-auto">
-{`# cURL Example
-curl https://api-inference... \\
-  -X POST \\
-  -H "Authorization: Bearer TOKEN" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "inputs": "${input.slice(0, 30)}...",
-    "parameters": {
-      "temperature": ${temperature[0]},
-      "max_tokens": ${maxTokens[0]}
-    }
-  }'`}
-                      </pre>
-                    </Card>
-                  </TabsContent>
-                </Tabs>
-              </Card>
-
-              {savedPrompts.length > 0 && (
-                <Card className="p-4">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Star size={18} weight="fill" className="text-accent" />
-                    Saved Prompts
-                  </h4>
-                  <div className="space-y-2">
-                    {savedPrompts.slice(0, 5).map((saved) => (
-                      <div
-                        key={saved.id}
-                        className="flex items-center justify-between p-2 bg-muted rounded-lg hover:bg-muted/70 transition-colors"
-                      >
-                        <button
-                          onClick={() => loadSavedPrompt(saved.id)}
-                          className="flex-1 text-left text-sm truncate"
-                        >
-                          {saved.name}
-                        </button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => deleteSavedPrompt(saved.id)}
-                        >
-                          <Trash size={14} />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              )}
-
-              {history.length > 0 && (
-                <Card className="p-4">
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Clock size={18} />
-                    Recent Executions
-                  </h4>
-                  <div className="space-y-2">
-                    {history.slice(0, 5).map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-3 bg-muted rounded-lg space-y-1 hover:bg-muted/70 transition-colors cursor-pointer"
-                        onClick={() => {
-                          const task = PLAYGROUND_TASKS.find(t => t.id === item.taskId)
-                          if (task) {
-                            setSelectedTask(task)
-                            setSelectedModel(item.model)
-                            setInput(item.input)
-                            setOutput(item.output)
-                          }
-                        }}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium">{item.taskName}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {item.executionTime}ms
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">{item.input}</p>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(item.timestamp).toLocaleString()}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              )}
-
-              <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
-                <h4 className="font-semibold mb-3">Quick Stats</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <div className="text-2xl font-bold text-accent">{history.length}</div>
-                    <div className="text-xs text-muted-foreground">Total Runs</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-accent">{savedPrompts.length}</div>
-                    <div className="text-xs text-muted-foreground">Saved Prompts</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">130K+</div>
-                    <div className="text-xs text-muted-foreground">Models</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">150+</div>
-                    <div className="text-xs text-muted-foreground">Tasks</div>
-                  </div>
-                </div>
-              </Card>
+              <PlaygroundStats
+                totalRuns={history.length}
+                savedPrompts={savedPrompts.length}
+              />
             </div>
           </div>
         </TabsContent>
