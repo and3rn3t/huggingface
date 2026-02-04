@@ -12,11 +12,11 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { API_ERROR_MESSAGES, useApiError } from '@/hooks/use-api-error';
 import { useFavorites } from '@/hooks/use-favorites';
-import { HFModel, searchModels } from '@/services/huggingface';
+import { useSearchModels } from '@/hooks/use-queries';
+import { HFModel, HFModelSearchParams } from '@/services/huggingface';
 import { ArrowClockwise, Copy, Cpu, Heart, MagnifyingGlass, Sparkle } from '@phosphor-icons/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ReadmeViewer } from './ReadmeViewer';
 
@@ -90,42 +90,29 @@ export function ModelExplorer() {
   const [selectedFramework, setSelectedFramework] = useState('All Frameworks');
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
   const [activeTab, setActiveTab] = useState('all');
-  const [models, setModels] = useState<Model[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { showError } = useApiError({
-    messages: API_ERROR_MESSAGES.MODELS,
-  });
-
-  const fetchModels = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const params: Parameters<typeof searchModels>[0] = {
-        search: debouncedSearch || undefined,
-        limit: 30,
-        sort: 'downloads',
-        direction: 'desc',
-      };
-
-      if (selectedTask !== 'All Tasks') {
-        params.pipeline_tag = selectedTask;
-      }
-
-      if (selectedFramework !== 'All Frameworks') {
-        params.library = selectedFramework;
-      }
-
-      const hfModels = await searchModels(params);
-      const transformedModels = hfModels.map(transformModel);
-      setModels(transformedModels);
-    } catch (error) {
-      showError(error);
-      setModels([]);
-    } finally {
-      setIsLoading(false);
+  // Build query params
+  const queryParams = useMemo(() => {
+    const params: HFModelSearchParams = {
+      search: debouncedSearch || undefined,
+      limit: 30,
+      sort: 'downloads',
+      direction: 'desc',
+    };
+    if (selectedTask !== 'All Tasks') {
+      params.pipeline_tag = selectedTask;
     }
-  }, [debouncedSearch, selectedTask, selectedFramework, showError]);
+    if (selectedFramework !== 'All Frameworks') {
+      params.library = selectedFramework;
+    }
+    return params;
+  }, [debouncedSearch, selectedTask, selectedFramework]);
+
+  const { data: hfModels = [], isLoading, error, refetch } = useSearchModels(queryParams);
+
+  // Transform models
+  const models = useMemo(() => hfModels.map(transformModel), [hfModels]);
 
   // Debounce search input
   useEffect(() => {
@@ -135,11 +122,6 @@ export function ModelExplorer() {
 
     return () => clearTimeout(timer);
   }, [search]);
-
-  // Fetch models when filters change
-  useEffect(() => {
-    fetchModels();
-  }, [fetchModels]);
 
   const favoriteModels = models.filter((model) => isFavorite(model.id, 'model'));
 
@@ -156,12 +138,14 @@ export function ModelExplorer() {
     toast.success(isFavorite(model.id, 'model') ? 'Removed from favorites' : 'Added to favorites');
   };
 
-  const handleRefresh = () => {
-    fetchModels();
-  };
-
   return (
     <div className="space-y-6">
+      {error && (
+        <Card className="border-destructive/50 bg-destructive/10 p-4">
+          <p className="text-destructive text-sm">Failed to load models. Try refreshing.</p>
+        </Card>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="mb-2 text-2xl font-semibold tracking-tight">Model Explorer</h2>
@@ -172,7 +156,7 @@ export function ModelExplorer() {
         <Button
           variant="outline"
           size="sm"
-          onClick={handleRefresh}
+          onClick={() => refetch()}
           disabled={isLoading}
           className="gap-2"
         >

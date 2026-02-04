@@ -5,9 +5,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { API_ERROR_MESSAGES, useApiError } from '@/hooks/use-api-error';
 import { useFavorites } from '@/hooks/use-favorites';
-import { HFDataset, searchDatasets } from '@/services/huggingface';
+import { useSearchDatasets } from '@/hooks/use-queries';
+import { HFDataset, HFDatasetSearchParams } from '@/services/huggingface';
 import {
   ArrowClockwise,
   Copy,
@@ -16,7 +16,7 @@ import {
   MagnifyingGlass,
   Sparkle,
 } from '@phosphor-icons/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ReadmeViewer } from './ReadmeViewer';
 
@@ -94,34 +94,25 @@ function transformDataset(hfDataset: HFDataset): Dataset {
 export function DatasetBrowser() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const { isFavorite, toggleFavorite } = useFavorites();
 
-  const { showError } = useApiError({
-    messages: API_ERROR_MESSAGES.DATASETS,
-  });
+  // Build query params
+  const queryParams = useMemo(() => {
+    const params: HFDatasetSearchParams = {
+      search: debouncedSearch || undefined,
+      limit: 30,
+      sort: 'downloads',
+      direction: 'desc',
+    };
+    return params;
+  }, [debouncedSearch]);
 
-  const fetchDatasets = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const results = await searchDatasets({
-        search: debouncedSearch || undefined,
-        sort: 'downloads',
-        direction: 'desc',
-        limit: 30,
-      });
-      const transformedDatasets = results.map(transformDataset);
-      setDatasets(transformedDatasets);
-    } catch (error) {
-      showError(error);
-      setDatasets([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [debouncedSearch, showError]);
+  const { data: hfDatasets = [], isLoading, error, refetch } = useSearchDatasets(queryParams);
+
+  // Transform datasets
+  const datasets = useMemo(() => hfDatasets.map(transformDataset), [hfDatasets]);
 
   // Debounce search input
   useEffect(() => {
@@ -130,11 +121,6 @@ export function DatasetBrowser() {
     }, 300);
     return () => clearTimeout(timer);
   }, [search]);
-
-  // Fetch datasets when debounced search changes
-  useEffect(() => {
-    fetchDatasets();
-  }, [fetchDatasets]);
 
   const favoriteDatasets = datasets.filter((dataset) => isFavorite(dataset.id, 'dataset'));
 
@@ -154,7 +140,7 @@ export function DatasetBrowser() {
   };
 
   const handleRefresh = () => {
-    fetchDatasets();
+    refetch();
   };
 
   const DatasetSkeleton = () => (
@@ -226,6 +212,12 @@ export function DatasetBrowser() {
                 className="pl-10"
               />
             </div>
+          )}
+
+          {error && (
+            <Card className="border-destructive/50 bg-destructive/10 p-4">
+              <p className="text-destructive text-sm">Failed to load datasets. Try refreshing.</p>
+            </Card>
           )}
 
           {isLoading ? (
