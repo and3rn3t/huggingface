@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { InlineEmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -287,21 +288,19 @@ export function DatasetBrowser() {
           )}
 
           {!isLoading && displayDatasets.length === 0 && activeTab === 'all' && (
-            <div className="py-12 text-center">
-              <Database className="text-muted-foreground mx-auto mb-4" size={48} />
-              <h3 className="mb-2 text-lg font-medium">No datasets found</h3>
-              <p className="text-muted-foreground">Try adjusting your search terms</p>
-            </div>
+            <InlineEmptyState
+              icon={Database}
+              title="No datasets found"
+              description="Try adjusting your search terms"
+            />
           )}
 
           {!isLoading && displayDatasets.length === 0 && activeTab === 'favorites' && (
-            <div className="py-12 text-center">
-              <Heart className="text-muted-foreground mx-auto mb-4" size={48} />
-              <h3 className="mb-2 text-lg font-medium">No favorites yet</h3>
-              <p className="text-muted-foreground">
-                Click the heart icon on any dataset to save it to your favorites
-              </p>
-            </div>
+            <InlineEmptyState
+              icon={Heart}
+              title="No favorites yet"
+              description="Click the heart icon on any dataset to save it to your favorites"
+            />
           )}
         </TabsContent>
       </Tabs>
