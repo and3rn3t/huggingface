@@ -20,7 +20,7 @@ import {
   List,
   Trophy,
 } from '@phosphor-icons/react';
-import { useState } from 'react';
+import { memo, useState } from 'react';
 
 interface NavigationProps {
   activeTab: string;
@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
   { id: 'achievements', label: 'Achievements', icon: Trophy, group: 'personal' },
 ];
 
-export function Navigation({ activeTab, onTabChange, favoritesCount }: NavigationProps) {
+function NavigationComponent({ activeTab, onTabChange, favoritesCount }: NavigationProps) {
   const isMobile = useIsMobile();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -379,3 +379,5 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
     </div>
   );
 }
+
+export const Navigation = memo(NavigationComponent);

@@ -25,16 +25,6 @@ interface TrendingItem {
   category: string;
 }
 
-function formatDownloads(downloads: number): string {
-  if (downloads >= 1_000_000) {
-    return `${(downloads / 1_000_000).toFixed(1)}M`;
-  }
-  if (downloads >= 1_000) {
-    return `${(downloads / 1_000).toFixed(1)}K`;
-  }
-  return downloads.toString();
-}
-
 function transformModelToTrendingItem(
   model: HFModel,
   index: number,
@@ -155,7 +145,7 @@ export function TrendingSection() {
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="from-accent/20 to-primary/20 border-accent/50 bg-gradient-to-br p-4">
+        <Card className="from-accent/20 to-primary/20 border-accent/50 bg-linear-to-br p-4">
           <div className="mb-2 flex items-center gap-2">
             <TrendUp className="text-accent" size={20} />
             <span className="text-muted-foreground text-sm">Top Trending</span>
@@ -166,7 +156,7 @@ export function TrendingSection() {
           <div className="text-muted-foreground text-xs">Hot items this week</div>
         </Card>
 
-        <Card className="from-primary/20 to-accent/10 border-primary/50 bg-gradient-to-br p-4">
+        <Card className="from-primary/20 to-accent/10 border-primary/50 bg-linear-to-br p-4">
           <div className="mb-2 flex items-center gap-2">
             <ArrowUp className="text-green-500" size={20} weight="bold" />
             <span className="text-muted-foreground text-sm">Avg Growth</span>
@@ -181,7 +171,7 @@ export function TrendingSection() {
           <div className="text-muted-foreground text-xs">Week over week</div>
         </Card>
 
-        <Card className="from-accent/10 to-primary/20 border-accent/30 bg-gradient-to-br p-4">
+        <Card className="from-accent/10 to-primary/20 border-accent/30 bg-linear-to-br p-4">
           <div className="mb-2 flex items-center gap-2">
             <Cpu className="text-accent" size={20} />
             <span className="text-muted-foreground text-sm">Hot Models</span>
@@ -196,7 +186,7 @@ export function TrendingSection() {
           <div className="text-muted-foreground text-xs">Trending models</div>
         </Card>
 
-        <Card className="from-primary/20 to-accent/20 border-primary/30 bg-gradient-to-br p-4">
+        <Card className="from-primary/20 to-accent/20 border-primary/30 bg-linear-to-br p-4">
           <div className="mb-2 flex items-center gap-2">
             <Database className="text-accent" size={20} />
             <span className="text-muted-foreground text-sm">Hot Datasets</span>
@@ -243,7 +233,7 @@ export function TrendingSection() {
                 <Card
                   key={item.id}
                   className={`hover:shadow-accent/20 border-border hover:border-accent/50 relative cursor-pointer p-4 transition-all hover:-translate-y-1 hover:shadow-lg ${
-                    isTopTrending ? 'from-card to-accent/5 bg-gradient-to-br' : ''
+                    isTopTrending ? 'from-card to-accent/5 bg-linear-to-br' : ''
                   }`}
                   onClick={() => {
                     const url = `https://huggingface.co/${item.type === 'dataset' ? 'datasets/' : ''}${item.id}`;
@@ -259,12 +249,12 @@ export function TrendingSection() {
                   )}
 
                   <div className="mb-3 flex items-start gap-3">
-                    <Icon className="text-accent flex-shrink-0" size={24} />
+                    <Icon className="text-accent shrink-0" size={24} />
                     <div className="min-w-0 flex-1">
                       <div className="mb-1 flex items-center gap-2">
                         <h3 className="truncate text-lg font-medium">{item.name}</h3>
                         {isTopTrending && (
-                          <Sparkle className="text-accent flex-shrink-0" size={16} weight="fill" />
+                          <Sparkle className="text-accent shrink-0" size={16} weight="fill" />
                         )}
                       </div>
                       <p className="text-muted-foreground line-clamp-2 text-sm">
@@ -285,7 +275,7 @@ export function TrendingSection() {
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-4">
                       <span className="text-muted-foreground">
-                        {formatDownloads(item.downloads)} downloads
+                        {formatNumber(item.downloads)} downloads
                       </span>
                     </div>
                     <div className="flex items-center gap-1 font-medium text-green-500">
@@ -296,7 +286,7 @@ export function TrendingSection() {
 
                   <div className="bg-muted mt-3 h-2 overflow-hidden rounded-full">
                     <div
-                      className="from-accent to-primary h-full bg-gradient-to-r transition-all"
+                      className="from-accent to-primary h-full bg-linear-to-r transition-all"
                       style={{ width: `${item.trendScore}%` }}
                     />
                   </div>

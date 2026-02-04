@@ -2,8 +2,9 @@ import { Card } from '@/components/ui/card'
 import { Fire, Trophy } from '@phosphor-icons/react'
 import { useAchievements } from '@/hooks/use-achievements'
 import { motion } from 'framer-motion'
+import { memo } from 'react'
 
-export function StatsWidget() {
+function StatsWidgetComponent() {
   const { stats, getUnlockedCount, getTotalCount } = useAchievements()
   
   const currentStreak = stats.currentStreak || 0
@@ -17,7 +18,7 @@ export function StatsWidget() {
           animate={{ scale: 1 }}
           transition={{ type: 'spring' }}
         >
-          <Card className="px-3 py-1.5 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border-orange-500/50 flex items-center gap-2">
+          <Card className="px-3 py-1.5 bg-linear-to-r from-orange-500/20 to-yellow-500/20 border-orange-500/50 flex items-center gap-2">
             <motion.div
               animate={{
                 scale: [1, 1.2, 1],
@@ -38,7 +39,7 @@ export function StatsWidget() {
         </motion.div>
       )}
 
-      <Card className="px-3 py-1.5 bg-gradient-to-r from-accent/20 to-primary/20 border-accent/50 flex items-center gap-2">
+      <Card className="px-3 py-1.5 bg-linear-to-r from-accent/20 to-primary/20 border-accent/50 flex items-center gap-2">
         <Trophy className="text-accent" size={18} weight="fill" />
         <div className="flex items-baseline gap-1">
           <span className="text-lg font-bold text-accent">{unlockedCount}</span>
@@ -48,3 +49,5 @@ export function StatsWidget() {
     </div>
   )
 }
+
+export const StatsWidget = memo(StatsWidgetComponent);

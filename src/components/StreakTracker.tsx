@@ -54,7 +54,7 @@ export function StreakTracker() {
   const last7Days = getLast7Days()
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-orange-500/10 via-yellow-500/10 to-accent/10 border-orange-500/30 relative overflow-hidden">
+    <Card className="p-6 bg-linear-to-br from-orange-500/10 via-yellow-500/10 to-accent/10 border-orange-500/30 relative overflow-hidden">
       <div className="absolute -top-10 -right-10 w-40 h-40 bg-orange-500/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-yellow-500/20 rounded-full blur-3xl" />
       

@@ -4,9 +4,11 @@ import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InlineEmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
+import { cn, formatNumber } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useSearchDatasets } from '@/hooks/use-queries';
 import { HFDataset, HFDatasetSearchParams } from '@/services/huggingface';
 import {
@@ -17,7 +19,7 @@ import {
   MagnifyingGlass,
   Sparkle,
 } from '@phosphor-icons/react';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { ReadmeViewer } from './ReadmeViewer';
 
@@ -30,19 +32,6 @@ interface Dataset {
   likes: number;
   tags: string[];
   featured?: boolean;
-}
-
-/**
- * Format downloads with K/M suffixes
- */
-function formatDownloads(downloads: number): string {
-  if (downloads >= 1000000) {
-    return `${(downloads / 1000000).toFixed(1)}M`;
-  }
-  if (downloads >= 1000) {
-    return `${(downloads / 1000).toFixed(1)}K`;
-  }
-  return downloads.toString();
 }
 
 /**
@@ -97,7 +86,8 @@ export function DatasetBrowser() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
   const [activeTab, setActiveTab] = useState('all');
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite} = useFavorites();
+  const copyToClipboard = useCopyToClipboard();
 
   // Build query params
   const queryParams = useMemo(() => {
@@ -126,11 +116,6 @@ export function DatasetBrowser() {
   const favoriteDatasets = datasets.filter((dataset) => isFavorite(dataset.id, 'dataset'));
 
   const displayDatasets = activeTab === 'favorites' ? favoriteDatasets : datasets;
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
-  };
 
   const handleToggleFavorite = (e: React.MouseEvent, dataset: Dataset) => {
     e.stopPropagation();
@@ -279,7 +264,7 @@ export function DatasetBrowser() {
                   </div>
 
                   <div className="text-muted-foreground mt-3 flex items-center gap-4 text-xs">
-                    <span>{formatDownloads(dataset.downloads)} downloads</span>
+                    <span>{formatNumber(dataset.downloads)} downloads</span>
                     <span>❤️ {dataset.likes}</span>
                   </div>
                 </Card>
@@ -379,7 +364,7 @@ dataset = load_dataset("${selectedDataset.id}")`}
               <div className="flex items-center gap-6 pt-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">Downloads: </span>
-                  <span className="font-medium">{formatDownloads(selectedDataset.downloads)}</span>
+                  <span className="font-medium">{formatNumber(selectedDataset.downloads)}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Likes: </span>

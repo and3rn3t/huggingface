@@ -62,7 +62,7 @@ function AchievementCard({ achievement }: { achievement: Achievement }) {
       >
         <div className="flex items-start gap-3">
           <div
-            className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
+            className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
               isUnlocked
                 ? 'bg-accent/30 shadow-md shadow-accent/20'
                 : 'bg-muted'
@@ -137,13 +137,13 @@ export function AchievementsPanel() {
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="text-3xl font-bold mb-2 tracking-tight bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
+          <h2 className="text-3xl font-bold mb-2 tracking-tight bg-linear-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
             Achievements
           </h2>
           <p className="text-muted-foreground">Track your learning journey and unlock rewards</p>
         </div>
 
-        <Card className="p-4 bg-gradient-to-br from-accent/20 to-primary/20 border-accent/50 min-w-[200px]">
+      <Card className="p-4 bg-linear-to-br from-accent/20 to-primary/20 border-accent/50 min-w-[200px]">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-accent/30 rounded-lg">
               <Trophy className="text-accent" size={28} weight="fill" />
@@ -158,7 +158,7 @@ export function AchievementsPanel() {
         </Card>
       </div>
 
-      <Card className="p-6 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
+    <Card className="p-6 bg-linear-to-br from-primary/10 to-accent/10 border-primary/30">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <Trophy className="text-accent" size={24} weight="fill" />

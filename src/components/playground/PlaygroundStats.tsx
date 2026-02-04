@@ -7,7 +7,7 @@ interface PlaygroundStatsProps {
 
 export function PlaygroundStats({ totalRuns, savedPrompts }: PlaygroundStatsProps) {
   return (
-    <Card className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 border-primary/30">
+    <Card className="p-4 bg-linear-to-br from-primary/10 to-accent/10 border-primary/30">
       <h4 className="font-semibold mb-3">Quick Stats</h4>
       <div className="grid grid-cols-2 gap-3">
         <div>

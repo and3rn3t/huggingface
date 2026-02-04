@@ -93,12 +93,6 @@ const commands: NavCommand[] = [
   },
 ];
 
-function formatDownloads(downloads: number): string {
-  if (downloads >= 1000000) return `${(downloads / 1000000).toFixed(1)}M`;
-  if (downloads >= 1000) return `${(downloads / 1000).toFixed(1)}K`;
-  return downloads.toString();
-}
-
 export function QuickNav({ activeTab, onNavigate }: QuickNavProps) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -267,7 +261,7 @@ export function QuickNav({ activeTab, onNavigate }: QuickNavProps) {
                     </div>
                     {model.downloads && (
                       <span className="text-muted-foreground text-xs">
-                        ⬇️ {formatDownloads(model.downloads)}
+                        ⬇️ {formatNumber(model.downloads)}
                       </span>
                     )}
                   </CommandItem>
@@ -293,7 +287,7 @@ export function QuickNav({ activeTab, onNavigate }: QuickNavProps) {
                     </div>
                     {dataset.downloads && (
                       <span className="text-muted-foreground text-xs">
-                        ⬇️ {formatDownloads(dataset.downloads)}
+                        ⬇️ {formatNumber(dataset.downloads)}
                       </span>
                     )}
                   </CommandItem>

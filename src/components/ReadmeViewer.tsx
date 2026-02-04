@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowClockwise, FileText, Warning } from '@phosphor-icons/react';
@@ -45,7 +46,9 @@ export function ReadmeViewer({
 
       // Parse markdown to HTML
       const html = await marked.parse(content);
-      setReadme(html);
+      // Sanitize HTML to prevent XSS attacks
+      const sanitized = DOMPurify.sanitize(html);
+      setReadme(sanitized);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load README';
       

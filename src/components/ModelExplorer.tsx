@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InlineEmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
+import { cn, formatNumber } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -14,6 +15,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useSearchModels } from '@/hooks/use-queries';
 import { HFModel, HFModelSearchParams } from '@/services/huggingface';
 import { ArrowClockwise, Copy, Cpu, Heart, MagnifyingGlass, Sparkle } from '@phosphor-icons/react';
@@ -56,16 +58,6 @@ const FRAMEWORKS = [
   'safetensors',
 ];
 
-function formatDownloads(downloads: number): string {
-  if (downloads >= 1000000) {
-    return `${(downloads / 1000000).toFixed(1)}M`;
-  }
-  if (downloads >= 1000) {
-    return `${(downloads / 1000).toFixed(1)}K`;
-  }
-  return downloads.toString();
-}
-
 function transformModel(hfModel: HFModel): Model {
   const id = hfModel.id || hfModel.modelId;
   const nameParts = id.split('/');
@@ -92,6 +84,7 @@ export function ModelExplorer() {
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
   const [activeTab, setActiveTab] = useState('all');
   const { isFavorite, toggleFavorite } = useFavorites();
+  const copyToClipboard = useCopyToClipboard();
 
   // Build query params
   const queryParams = useMemo(() => {
@@ -127,11 +120,6 @@ export function ModelExplorer() {
   const favoriteModels = models.filter((model) => isFavorite(model.id, 'model'));
 
   const displayModels = activeTab === 'favorites' ? favoriteModels : models;
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
-  };
 
   const handleToggleFavorite = (e: React.MouseEvent, model: Model) => {
     e.stopPropagation();
@@ -284,7 +272,7 @@ export function ModelExplorer() {
                   </div>
 
                   <div className="text-muted-foreground flex items-center gap-4 text-xs">
-                    <span>{formatDownloads(model.downloads)} downloads</span>
+                    <span>{formatNumber(model.downloads)} downloads</span>
                     <span>❤️ {model.likes}</span>
                   </div>
                 </Card>
@@ -397,7 +385,7 @@ tokenizer = AutoTokenizer.from_pretrained("${selectedModel.id}")`}
               <div className="flex items-center gap-6 pt-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">Downloads: </span>
-                  <span className="font-medium">{formatDownloads(selectedModel.downloads)}</span>
+                  <span className="font-medium">{formatNumber(selectedModel.downloads)}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Likes: </span>

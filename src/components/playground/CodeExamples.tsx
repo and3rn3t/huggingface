@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { useCallback } from 'react';
 
 interface CodeExamplesProps {
   selectedModel: string;
@@ -17,7 +18,7 @@ export function CodeExamples({
   temperature,
   maxTokens,
 }: CodeExamplesProps) {
-  const copyCode = (lang: 'python' | 'javascript' | 'curl') => {
+  const copyCode = useCallback((lang: 'python' | 'javascript' | 'curl') => {
     const codes = {
       python: `# Python Example
 import requests
@@ -75,7 +76,7 @@ curl https://api-inference.huggingface.co/models/${selectedModel} \\
 
     navigator.clipboard.writeText(codes[lang]);
     toast.success(`${lang.toUpperCase()} code copied!`);
-  };
+  }, [selectedModel, input, temperature, maxTokens]);
 
   return (
     <Card className="p-4">

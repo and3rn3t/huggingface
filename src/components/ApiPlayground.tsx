@@ -398,7 +398,7 @@ export function ApiPlayground() {
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="from-accent via-primary to-accent mb-2 bg-gradient-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent">
+            <h2 className="from-accent via-primary to-accent mb-2 bg-linear-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent">
               AI Playground
             </h2>
             <p className="text-muted-foreground text-lg">
@@ -422,8 +422,8 @@ export function ApiPlayground() {
         <div className="bg-primary/20 pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full blur-3xl" />
       </motion.div>
 
-      <Card className="border-accent/50 from-accent/5 to-primary/5 relative overflow-hidden bg-gradient-to-br via-transparent p-6">
-        <div className="from-accent/10 to-primary/10 absolute inset-0 bg-gradient-to-r opacity-50" />
+      <Card className="border-accent/50 from-accent/5 to-primary/5 relative overflow-hidden bg-linear-to-br via-transparent p-6">
+        <div className="from-accent/10 to-primary/10 absolute inset-0 bg-linear-to-r opacity-50" />
         <div className="relative flex items-start gap-3">
           <div className="bg-accent/20 rounded-lg p-2">
             <Lightning className="text-accent" size={24} weight="fill" />
@@ -576,7 +576,7 @@ export function ApiPlayground() {
                     <Button
                       onClick={executeTask}
                       disabled={isLoading || !input.trim()}
-                      className="from-primary to-accent flex-1 bg-gradient-to-r transition-opacity hover:opacity-90"
+                      className="from-primary to-accent flex-1 bg-linear-to-r transition-opacity hover:opacity-90"
                       size="lg"
                     >
                       {isLoading ? (

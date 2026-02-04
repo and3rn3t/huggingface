@@ -368,7 +368,7 @@ export function LearningResources() {
         </div>
 
         {completedLessons.length > 0 && (
-          <Card className="from-accent/20 to-primary/20 border-accent/50 bg-gradient-to-br p-4">
+        <Card className="from-accent/20 to-primary/20 border-accent/50 bg-linear-to-br p-4">
             <div className="flex items-center gap-3">
               <Trophy className="text-accent" size={32} weight="fill" />
               <div>
@@ -384,7 +384,7 @@ export function LearningResources() {
 
       <StreakTracker />
 
-      <Card className="from-primary/10 to-accent/10 border-primary/30 bg-gradient-to-br p-6">
+      <Card className="from-primary/10 to-accent/10 border-primary/30 bg-linear-to-br p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <GraduationCap className="text-accent" size={28} weight="bold" />
@@ -437,7 +437,7 @@ export function LearningResources() {
                   >
                     <div className="flex items-start gap-3">
                       <div
-                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
                           isCompleted ? 'bg-accent/20' : 'bg-muted'
                         }`}
                       >
@@ -456,7 +456,7 @@ export function LearningResources() {
                         <p className="text-muted-foreground text-sm">{lesson.description}</p>
                       </div>
 
-                      <div className="flex flex-shrink-0 items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-2">
                         {quizPassed && <Star className="text-accent" size={20} weight="fill" />}
                         {isCompleted ? (
                           <CheckCircle className="text-accent" size={24} weight="fill" />
@@ -523,7 +523,7 @@ export function LearningResources() {
                                 >
                                   <div className="flex items-start gap-2">
                                     <Lightbulb
-                                      className="text-accent mt-0.5 flex-shrink-0"
+                                      className="text-accent mt-0.5 shrink-0"
                                       size={18}
                                       weight="fill"
                                     />
@@ -603,9 +603,9 @@ export function LearningResources() {
         </div>
 
         <div className="space-y-4">
-          <Card className="from-primary/10 to-accent/10 border-primary/30 bg-gradient-to-br p-4">
+          <Card className="from-primary/10 to-accent/10 border-primary/30 bg-linear-to-br p-4">
             <div className="mb-4 flex items-start gap-3">
-              <Sparkle className="text-accent mt-1 flex-shrink-0" size={24} weight="fill" />
+              <Sparkle className="text-accent mt-1 shrink-0" size={24} weight="fill" />
               <div>
                 <h3 className="mb-1 font-semibold">Quick Tips</h3>
                 <p className="text-muted-foreground text-xs">Pro tips to accelerate learning</p>
@@ -614,7 +614,7 @@ export function LearningResources() {
             <ul className="space-y-2">
               {QUICK_TIPS.map((tip, index) => (
                 <li key={index} className="flex items-start gap-2 text-xs">
-                  <ArrowRight className="text-accent mt-0.5 flex-shrink-0" size={14} />
+                  <ArrowRight className="text-accent mt-0.5 shrink-0" size={14} />
                   <span>{tip}</span>
                 </li>
               ))}
@@ -681,7 +681,7 @@ export function LearningResources() {
               className="hover:shadow-primary/20 border-border hover:border-accent/50 p-4 transition-all hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="mb-3 flex items-start gap-3">
-                <Icon className="text-accent flex-shrink-0" size={24} />
+              <Icon className="text-accent shrink-0" size={24} />
                 <div className="flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <h3 className="font-medium">{resource.title}</h3>

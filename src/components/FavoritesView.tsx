@@ -183,7 +183,7 @@ export function FavoritesView() {
                 </div>
 
                 <div className="flex items-start gap-3 pr-16">
-                  <Database className="text-accent flex-shrink-0" size={24} />
+                  <Database className="text-accent shrink-0" size={24} />
                   <div className="min-w-0 flex-1">
                     <h4 className="mb-1 truncate text-base font-medium">{fav.name}</h4>
                     <Badge variant="outline" className="text-xs">
@@ -268,7 +268,7 @@ export function FavoritesView() {
                 </div>
 
                 <div className="flex items-start gap-3 pr-16">
-                  <Cpu className="text-accent flex-shrink-0" size={24} />
+                  <Cpu className="text-accent shrink-0" size={24} />
                   <div className="min-w-0 flex-1">
                     <h4 className="mb-1 truncate text-base font-medium">{fav.name}</h4>
                     <Badge variant="outline" className="max-w-full truncate text-xs">
