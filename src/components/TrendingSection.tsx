@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTrending } from '@/hooks/use-queries';
+import { formatNumber } from '@/lib/utils';
 import { HFDataset, HFModel } from '@/services/huggingface';
 import {
   ArrowClockwise,

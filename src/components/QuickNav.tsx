@@ -7,6 +7,7 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command';
+import { formatNumber } from '@/lib/utils';
 import { HFDataset, HFModel, searchDatasets, searchModels } from '@/services/huggingface';
 import {
   ArrowsLeftRight,
