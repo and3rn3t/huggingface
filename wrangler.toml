@@ -3,11 +3,19 @@ compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
 # Environment variables for Pages Functions
-# Note: Secrets should be set via Cloudflare dashboard or wrangler CLI
-# These are non-sensitive defaults
-[vars]
-# VITE_HF_TOKEN should be set as a secret in Cloudflare dashboard
+# Secrets must be set using wrangler CLI (they cannot be stored in this file):
+#
+# To set secrets for production:
+#   wrangler pages secret put VITE_HF_TOKEN --project-name=hug
+#
+# To set secrets for preview:
+#   wrangler pages secret put VITE_HF_TOKEN --project-name=hug --env=preview
+#
+# Or use the Cloudflare Dashboard: Pages → hug → Settings → Environment Variables
 
-# For local development with wrangler pages dev
+# Non-sensitive environment variables can go here
+[vars]
+
+# Preview environment configuration
 [env.preview]
 compatibility_date = "2024-01-01"

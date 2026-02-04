@@ -1,6 +1,6 @@
 /**
  * Cloudflare Pages Function - HuggingFace API Proxy
- * 
+ *
  * Proxies requests to HuggingFace API to avoid CORS issues.
  * All requests to /api/* are forwarded to huggingface.co/api/*
  * All requests to /api/inference/* are forwarded to api-inference.huggingface.co/models/*
@@ -13,10 +13,14 @@ interface Env {
 const HF_API_BASE = 'https://huggingface.co/api';
 const HF_INFERENCE_BASE = 'https://api-inference.huggingface.co/models';
 
-export async function onRequest(context: { request: Request; env: Env; params: { path: string[] } }) {
+export async function onRequest(context: {
+  request: Request;
+  env: Env;
+  params: { path: string[] };
+}) {
   const { request, env, params } = context;
   const url = new URL(request.url);
-  
+
   // Handle CORS preflight
   if (request.method === 'OPTIONS') {
     return new Response(null, {
@@ -63,10 +67,22 @@ export async function onRequest(context: { request: Request; env: Env; params: {
     const proxyRequest = new Request(targetUrl, {
       method: request.method,
       headers,
-      body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.arrayBuffer() : undefined,
+      body:
+        request.method !== 'GET' && request.method !== 'HEAD'
+          ? await request.arrayBuffer()
+          : undefined,
     });
 
     const response = await fetch(proxyRequest);
+
+    // For debugging: log response status for inference requests
+    if (pathSegments[0] === 'inference' && !response.ok) {
+      console.error(
+        `Inference API error: ${response.status} ${response.statusText} for ${targetUrl}`
+      );
+      const hasAuth = authHeader || env.VITE_HF_TOKEN;
+      console.error(`Authorization present: ${!!hasAuth}`);
+    }
 
     // Clone response to modify headers
     const responseHeaders = new Headers(response.headers);
