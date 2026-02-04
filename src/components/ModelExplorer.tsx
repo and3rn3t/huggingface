@@ -1,140 +1,183 @@
-import { useState } from 'react'
-import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MagnifyingGlass, Cpu, Copy, Sparkle, ArrowRight, Heart } from '@phosphor-icons/react'
-import { toast } from 'sonner'
-import { useFavorites } from '@/hooks/use-favorites'
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { API_ERROR_MESSAGES, useApiError } from '@/hooks/use-api-error';
+import { useFavorites } from '@/hooks/use-favorites';
+import { HFModel, searchModels } from '@/services/huggingface';
+import { ArrowClockwise, Copy, Cpu, Heart, MagnifyingGlass, Sparkle } from '@phosphor-icons/react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 interface Model {
-  id: string
-  name: string
-  description: string
-  task: string
-  framework: string
-  downloads: number
-  likes: number
-  pipeline: string
-  featured?: boolean
+  id: string;
+  name: string;
+  description: string;
+  task: string;
+  framework: string;
+  downloads: number;
+  likes: number;
+  pipeline: string;
+  featured?: boolean;
 }
 
-const SAMPLE_MODELS: Model[] = [
-  {
-    id: 'bert-base-uncased',
-    name: 'BERT Base Uncased',
-    description: 'Pretrained BERT model on English language using a masked language modeling objective',
-    task: 'Fill-Mask',
-    framework: 'PyTorch',
-    downloads: 45200000,
-    likes: 2341,
-    pipeline: 'fill-mask',
-    featured: true
-  },
-  {
-    id: 'gpt2',
-    name: 'GPT-2',
-    description: 'OpenAI\'s GPT-2 model for text generation, trained on WebText dataset',
-    task: 'Text Generation',
-    framework: 'PyTorch',
-    downloads: 38900000,
-    likes: 1876,
-    pipeline: 'text-generation'
-  },
-  {
-    id: 'distilbert-base-uncased',
-    name: 'DistilBERT',
-    description: 'Distilled version of BERT: smaller, faster, cheaper and lighter than BERT',
-    task: 'Feature Extraction',
-    framework: 'PyTorch',
-    downloads: 52100000,
-    likes: 2567,
-    pipeline: 'feature-extraction',
-    featured: true
-  },
-  {
-    id: 'facebook/bart-large-cnn',
-    name: 'BART Large CNN',
-    description: 'BART model fine-tuned on CNN Daily Mail for summarization tasks',
-    task: 'Summarization',
-    framework: 'PyTorch',
-    downloads: 12400000,
-    likes: 892,
-    pipeline: 'summarization'
-  },
-  {
-    id: 't5-base',
-    name: 'T5 Base',
-    description: 'Text-to-Text Transfer Transformer for various NLP tasks',
-    task: 'Text2Text Generation',
-    framework: 'PyTorch',
-    downloads: 28700000,
-    likes: 1453,
-    pipeline: 'text2text-generation',
-    featured: true
-  },
-  {
-    id: 'sentence-transformers/all-MiniLM-L6-v2',
-    name: 'All MiniLM L6 v2',
-    description: 'Sentence transformer model for semantic similarity and sentence embeddings',
-    task: 'Sentence Similarity',
-    framework: 'PyTorch',
-    downloads: 67800000,
-    likes: 3124,
-    pipeline: 'sentence-similarity'
-  }
-]
+const TASKS = [
+  'All Tasks',
+  'fill-mask',
+  'text-generation',
+  'summarization',
+  'text2text-generation',
+  'feature-extraction',
+  'sentence-similarity',
+  'text-classification',
+  'question-answering',
+  'translation',
+  'image-classification',
+];
+const FRAMEWORKS = [
+  'All Frameworks',
+  'transformers',
+  'pytorch',
+  'tensorflow',
+  'jax',
+  'diffusers',
+  'safetensors',
+];
 
-const TASKS = ['All Tasks', 'Fill-Mask', 'Text Generation', 'Summarization', 'Text2Text Generation', 'Feature Extraction', 'Sentence Similarity']
-const FRAMEWORKS = ['All Frameworks', 'PyTorch', 'TensorFlow', 'JAX']
+function formatDownloads(downloads: number): string {
+  if (downloads >= 1000000) {
+    return `${(downloads / 1000000).toFixed(1)}M`;
+  }
+  if (downloads >= 1000) {
+    return `${(downloads / 1000).toFixed(1)}K`;
+  }
+  return downloads.toString();
+}
+
+function transformModel(hfModel: HFModel): Model {
+  const id = hfModel.id || hfModel.modelId;
+  const nameParts = id.split('/');
+  const name = nameParts.length > 1 ? nameParts[1] : id;
+
+  return {
+    id,
+    name,
+    description: `Model by ${hfModel.author || nameParts[0] || 'Unknown'}`,
+    task: hfModel.pipeline_tag || 'Unknown',
+    framework: hfModel.library_name || 'Unknown',
+    downloads: hfModel.downloads || 0,
+    likes: hfModel.likes || 0,
+    pipeline: hfModel.pipeline_tag || 'text-generation',
+    featured: (hfModel.downloads || 0) > 1000000,
+  };
+}
 
 export function ModelExplorer() {
-  const [search, setSearch] = useState('')
-  const [selectedTask, setSelectedTask] = useState('All Tasks')
-  const [selectedFramework, setSelectedFramework] = useState('All Frameworks')
-  const [selectedModel, setSelectedModel] = useState<Model | null>(null)
-  const [activeTab, setActiveTab] = useState('all')
-  const { isFavorite, toggleFavorite, getFavoritesByType } = useFavorites()
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedTask, setSelectedTask] = useState('All Tasks');
+  const [selectedFramework, setSelectedFramework] = useState('All Frameworks');
+  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const [activeTab, setActiveTab] = useState('all');
+  const [models, setModels] = useState<Model[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
-  const filteredModels = SAMPLE_MODELS.filter(model => {
-    const matchesSearch = model.name.toLowerCase().includes(search.toLowerCase()) ||
-      model.description.toLowerCase().includes(search.toLowerCase()) ||
-      model.task.toLowerCase().includes(search.toLowerCase())
-    const matchesTask = selectedTask === 'All Tasks' || model.task === selectedTask
-    const matchesFramework = selectedFramework === 'All Frameworks' || model.framework === selectedFramework
-    
-    return matchesSearch && matchesTask && matchesFramework
-  })
+  const { showError } = useApiError({
+    messages: API_ERROR_MESSAGES.MODELS,
+  });
 
-  const favoriteModels = SAMPLE_MODELS.filter(model => 
-    isFavorite(model.id, 'model')
-  )
+  const fetchModels = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const params: Parameters<typeof searchModels>[0] = {
+        search: debouncedSearch || undefined,
+        limit: 30,
+        sort: 'downloads',
+        direction: 'desc',
+      };
 
-  const displayModels = activeTab === 'favorites' ? favoriteModels : filteredModels
+      if (selectedTask !== 'All Tasks') {
+        params.pipeline_tag = selectedTask;
+      }
+
+      if (selectedFramework !== 'All Frameworks') {
+        params.library = selectedFramework;
+      }
+
+      const hfModels = await searchModels(params);
+      const transformedModels = hfModels.map(transformModel);
+      setModels(transformedModels);
+    } catch (error) {
+      showError(error);
+      setModels([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [debouncedSearch, selectedTask, selectedFramework, showError]);
+
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch models when filters change
+  useEffect(() => {
+    fetchModels();
+  }, [fetchModels]);
+
+  const favoriteModels = models.filter((model) => isFavorite(model.id, 'model'));
+
+  const displayModels = activeTab === 'favorites' ? favoriteModels : models;
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success('Copied to clipboard!')
-  }
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
 
   const handleToggleFavorite = (e: React.MouseEvent, model: Model) => {
-    e.stopPropagation()
-    toggleFavorite(model.id, 'model', model.name)
-    toast.success(
-      isFavorite(model.id, 'model') 
-        ? 'Removed from favorites' 
-        : 'Added to favorites'
-    )
-  }
+    e.stopPropagation();
+    toggleFavorite(model.id, 'model', model.name);
+    toast.success(isFavorite(model.id, 'model') ? 'Removed from favorites' : 'Added to favorites');
+  };
+
+  const handleRefresh = () => {
+    fetchModels();
+  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold mb-2 tracking-tight">Model Explorer</h2>
-        <p className="text-muted-foreground">Discover pre-trained models for your machine learning tasks</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="mb-2 text-2xl font-semibold tracking-tight">Model Explorer</h2>
+          <p className="text-muted-foreground">
+            Discover pre-trained models for your machine learning tasks
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="gap-2"
+        >
+          <ArrowClockwise size={16} className={isLoading ? 'animate-spin' : ''} />
+          Refresh
+        </Button>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -146,11 +189,14 @@ export function ModelExplorer() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={activeTab} className="space-y-4 mt-6">
+        <TabsContent value={activeTab} className="mt-6 space-y-4">
           {activeTab === 'all' && (
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col gap-4 md:flex-row">
               <div className="relative flex-1">
-                <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+                <MagnifyingGlass
+                  className="text-muted-foreground absolute top-1/2 left-3 -translate-y-1/2"
+                  size={20}
+                />
                 <Input
                   placeholder="Search models by name or task..."
                   value={search}
@@ -158,91 +204,123 @@ export function ModelExplorer() {
                   className="pl-10"
                 />
               </div>
-              
+
               <Select value={selectedTask} onValueChange={setSelectedTask}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {TASKS.map(task => (
-                    <SelectItem key={task} value={task}>{task}</SelectItem>
+                  {TASKS.map((task) => (
+                    <SelectItem key={task} value={task}>
+                      {task}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              
+
               <Select value={selectedFramework} onValueChange={setSelectedFramework}>
                 <SelectTrigger className="w-full md:w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {FRAMEWORKS.map(framework => (
-                    <SelectItem key={framework} value={framework}>{framework}</SelectItem>
+                  {FRAMEWORKS.map((framework) => (
+                    <SelectItem key={framework} value={framework}>
+                      {framework}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displayModels.map((model) => (
-              <Card
-                key={model.id}
-                className="p-4 hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer group hover:-translate-y-1 border-border hover:border-primary/50 relative"
-                onClick={() => setSelectedModel(model)}
-              >
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="absolute top-2 right-2 h-8 w-8 p-0 z-10"
-                  onClick={(e) => handleToggleFavorite(e, model)}
-                >
-                  <Heart 
-                    size={18} 
-                    weight={isFavorite(model.id, 'model') ? 'fill' : 'regular'}
-                    className={isFavorite(model.id, 'model') ? 'text-accent' : 'text-muted-foreground'}
-                  />
-                </Button>
-
-                <div className="flex items-start justify-between mb-3 pr-8">
-                  <div className="flex items-center gap-2">
-                    <Cpu className="text-accent" size={24} />
-                    <h3 className="font-medium text-lg line-clamp-1">{model.name}</h3>
+          {isLoading ? (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Card key={index} className="p-4">
+                  <div className="mb-3 flex items-start justify-between">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-6 w-6 rounded" />
+                      <Skeleton className="h-5 w-32" />
+                    </div>
                   </div>
-                  {model.featured && <Sparkle className="text-accent flex-shrink-0" size={20} />}
-                </div>
-                
-                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{model.description}</p>
-                
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <Badge variant="secondary" className="text-xs">
-                    {model.task}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {model.framework}
-                  </Badge>
-                </div>
-                
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>{(model.downloads / 1000000).toFixed(1)}M downloads</span>
-                  <span>❤️ {model.likes}</span>
-                </div>
-              </Card>
-            ))}
-          </div>
+                  <Skeleton className="mb-2 h-4 w-full" />
+                  <Skeleton className="mb-3 h-4 w-3/4" />
+                  <div className="mb-3 flex gap-2">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                  <Skeleton className="h-4 w-1/2" />
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {displayModels.map((model) => (
+                <Card
+                  key={model.id}
+                  className="hover:shadow-primary/20 group border-border hover:border-primary/50 relative cursor-pointer p-4 transition-all hover:-translate-y-1 hover:shadow-lg"
+                  onClick={() => setSelectedModel(model)}
+                >
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="absolute top-2 right-2 z-10 h-8 w-8 p-0"
+                    onClick={(e) => handleToggleFavorite(e, model)}
+                  >
+                    <Heart
+                      size={18}
+                      weight={isFavorite(model.id, 'model') ? 'fill' : 'regular'}
+                      className={
+                        isFavorite(model.id, 'model') ? 'text-accent' : 'text-muted-foreground'
+                      }
+                    />
+                  </Button>
 
-          {displayModels.length === 0 && activeTab === 'all' && (
-            <div className="text-center py-12">
-              <Cpu className="mx-auto mb-4 text-muted-foreground" size={48} />
-              <h3 className="text-lg font-medium mb-2">No models found</h3>
+                  <div className="mb-3 flex items-start justify-between pr-8">
+                    <div className="flex items-center gap-2">
+                      <Cpu className="text-accent" size={24} />
+                      <h3 className="line-clamp-1 text-lg font-medium">{model.name}</h3>
+                    </div>
+                    {model.featured && <Sparkle className="text-accent shrink-0" size={20} />}
+                  </div>
+
+                  <p className="text-muted-foreground mb-3 line-clamp-2 text-sm">
+                    {model.description}
+                  </p>
+
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <Badge variant="secondary" className="text-xs">
+                      {model.task}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {model.framework}
+                    </Badge>
+                  </div>
+
+                  <div className="text-muted-foreground flex items-center gap-4 text-xs">
+                    <span>{formatDownloads(model.downloads)} downloads</span>
+                    <span>❤️ {model.likes}</span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {!isLoading && displayModels.length === 0 && activeTab === 'all' && (
+            <div className="py-12 text-center">
+              <Cpu className="text-muted-foreground mx-auto mb-4" size={48} />
+              <h3 className="mb-2 text-lg font-medium">No models found</h3>
               <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
             </div>
           )}
 
-          {displayModels.length === 0 && activeTab === 'favorites' && (
-            <div className="text-center py-12">
-              <Heart className="mx-auto mb-4 text-muted-foreground" size={48} />
-              <h3 className="text-lg font-medium mb-2">No favorites yet</h3>
-              <p className="text-muted-foreground">Click the heart icon on any model to save it to your favorites</p>
+          {!isLoading && displayModels.length === 0 && activeTab === 'favorites' && (
+            <div className="py-12 text-center">
+              <Heart className="text-muted-foreground mx-auto mb-4" size={48} />
+              <h3 className="mb-2 text-lg font-medium">No favorites yet</h3>
+              <p className="text-muted-foreground">
+                Click the heart icon on any model to save it to your favorites
+              </p>
             </div>
           )}
         </TabsContent>
@@ -256,24 +334,24 @@ export function ModelExplorer() {
               {selectedModel?.name}
             </DialogTitle>
           </DialogHeader>
-          
+
           {selectedModel && (
             <div className="space-y-4">
               <p className="text-foreground">{selectedModel.description}</p>
-              
+
               <div className="flex gap-4">
                 <div>
-                  <h4 className="font-medium mb-2">Task</h4>
+                  <h4 className="mb-2 font-medium">Task</h4>
                   <Badge variant="secondary">{selectedModel.task}</Badge>
                 </div>
                 <div>
-                  <h4 className="font-medium mb-2">Framework</h4>
+                  <h4 className="mb-2 font-medium">Framework</h4>
                   <Badge variant="outline">{selectedModel.framework}</Badge>
                 </div>
               </div>
-              
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+
+              <div className="bg-muted rounded-lg p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <h4 className="font-medium">Model ID</h4>
                   <Button
                     size="sm"
@@ -283,51 +361,59 @@ export function ModelExplorer() {
                     <Copy size={16} />
                   </Button>
                 </div>
-                <code className="text-sm text-accent">{selectedModel.id}</code>
+                <code className="text-accent text-sm">{selectedModel.id}</code>
               </div>
-              
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+
+              <div className="bg-muted rounded-lg p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <h4 className="font-medium">Pipeline Usage</h4>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => copyToClipboard(`from transformers import pipeline\n\npipe = pipeline("${selectedModel.pipeline}", model="${selectedModel.id}")\nresult = pipe("Your input text here")`)}
+                    onClick={() =>
+                      copyToClipboard(
+                        `from transformers import pipeline\n\npipe = pipeline("${selectedModel.pipeline}", model="${selectedModel.id}")\nresult = pipe("Your input text here")`
+                      )
+                    }
                   >
                     <Copy size={16} />
                   </Button>
                 </div>
-                <pre className="text-sm text-accent overflow-x-auto">
-{`from transformers import pipeline
+                <pre className="text-accent overflow-x-auto text-sm">
+                  {`from transformers import pipeline
 
 pipe = pipeline("${selectedModel.pipeline}", model="${selectedModel.id}")
 result = pipe("Your input text here")`}
                 </pre>
               </div>
-              
-              <div className="bg-muted p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
+
+              <div className="bg-muted rounded-lg p-4">
+                <div className="mb-2 flex items-center justify-between">
                   <h4 className="font-medium">Direct Model Loading</h4>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => copyToClipboard(`from transformers import AutoModel, AutoTokenizer\n\nmodel = AutoModel.from_pretrained("${selectedModel.id}")\ntokenizer = AutoTokenizer.from_pretrained("${selectedModel.id}")`)}
+                    onClick={() =>
+                      copyToClipboard(
+                        `from transformers import AutoModel, AutoTokenizer\n\nmodel = AutoModel.from_pretrained("${selectedModel.id}")\ntokenizer = AutoTokenizer.from_pretrained("${selectedModel.id}")`
+                      )
+                    }
                   >
                     <Copy size={16} />
                   </Button>
                 </div>
-                <pre className="text-sm text-accent overflow-x-auto">
-{`from transformers import AutoModel, AutoTokenizer
+                <pre className="text-accent overflow-x-auto text-sm">
+                  {`from transformers import AutoModel, AutoTokenizer
 
 model = AutoModel.from_pretrained("${selectedModel.id}")
 tokenizer = AutoTokenizer.from_pretrained("${selectedModel.id}")`}
                 </pre>
               </div>
-              
+
               <div className="flex items-center gap-6 pt-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">Downloads: </span>
-                  <span className="font-medium">{(selectedModel.downloads / 1000000).toFixed(1)}M</span>
+                  <span className="font-medium">{formatDownloads(selectedModel.downloads)}</span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">Likes: </span>
@@ -339,5 +425,5 @@ tokenizer = AutoTokenizer.from_pretrained("${selectedModel.id}")`}
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
