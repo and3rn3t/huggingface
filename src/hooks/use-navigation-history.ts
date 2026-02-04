@@ -1,60 +1,65 @@
-import { useKV } from '@github/spark/hooks'
-import { useEffect, useCallback } from 'react'
+import { useCallback } from 'react';
+import { useLocalStorage } from './use-local-storage';
 
 interface NavigationHistoryEntry {
-  tab: string
-  timestamp: number
+  tab: string;
+  timestamp: number;
 }
 
 export function useNavigationHistory() {
-  const [history, setHistory] = useKV<NavigationHistoryEntry[]>('navigation-history', [])
+  const [history, setHistory] = useLocalStorage<NavigationHistoryEntry[]>('navigation-history', []);
 
-  const pushToHistory = useCallback((tab: string) => {
-    setHistory((current = []) => {
-      const lastEntry = current[current.length - 1]
-      
-      if (lastEntry?.tab === tab) {
-        return current
-      }
+  const pushToHistory = useCallback(
+    (tab: string) => {
+      setHistory((current) => {
+        const arr = current || [];
+        const lastEntry = arr[arr.length - 1];
 
-      const newEntry: NavigationHistoryEntry = {
-        tab,
-        timestamp: Date.now()
-      }
+        if (lastEntry?.tab === tab) {
+          return arr;
+        }
 
-      const newHistory = [...current, newEntry]
-      return newHistory.slice(-20)
-    })
-  }, [setHistory])
+        const newEntry: NavigationHistoryEntry = {
+          tab,
+          timestamp: Date.now(),
+        };
+
+        const newHistory = [...arr, newEntry];
+        return newHistory.slice(-20);
+      });
+    },
+    [setHistory]
+  );
 
   const goBack = useCallback((): string | null => {
-    let previousTab: string | null = null
+    let previousTab: string | null = null;
 
-    setHistory((current = []) => {
-      if (current.length <= 1) {
-        return current
+    setHistory((current) => {
+      const arr = current || [];
+      if (arr.length <= 1) {
+        return arr;
       }
 
-      const newHistory = current.slice(0, -1)
-      previousTab = newHistory[newHistory.length - 1]?.tab || null
-      return newHistory
-    })
+      const newHistory = arr.slice(0, -1);
+      previousTab = newHistory[newHistory.length - 1]?.tab || null;
+      return newHistory;
+    });
 
-    return previousTab
-  }, [setHistory])
+    return previousTab;
+  }, [setHistory]);
 
-  const canGoBack = (history?.length || 0) > 1
+  const canGoBack = (history?.length || 0) > 1;
 
   const getPreviousTab = useCallback((): string | null => {
     if (!history || history.length <= 1) {
-      return null
+      return null;
     }
-    return history[history.length - 2]?.tab || null
-  }, [history])
+    return history[history.length - 2]?.tab || null;
+  }, [history]);
 
   const clearHistory = useCallback(() => {
-    setHistory([])
-  }, [setHistory])
+    setHistory([]);
+  }, [setHistory]);
 
   return {
     history: history || [],
@@ -62,6 +67,6 @@ export function useNavigationHistory() {
     goBack,
     canGoBack,
     getPreviousTab,
-    clearHistory
-  }
+    clearHistory,
+  };
 }

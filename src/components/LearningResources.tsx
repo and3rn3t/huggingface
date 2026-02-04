@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useAchievements } from '@/hooks/use-achievements';
-import { useKV } from '@github/spark/hooks';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import {
   ArrowRight,
   Book,
@@ -297,8 +297,14 @@ const QUICK_TIPS = [
 ];
 
 export function LearningResources() {
-  const [completedLessons = [], setCompletedLessons] = useKV<string[]>('completed-lessons', []);
-  const [quizScores = {}, setQuizScores] = useKV<Record<string, boolean>>('quiz-scores', {});
+  const [completedLessons = [], setCompletedLessons] = useLocalStorage<string[]>(
+    'completed-lessons',
+    []
+  );
+  const [quizScores = {}, setQuizScores] = useLocalStorage<Record<string, boolean>>(
+    'quiz-scores',
+    {}
+  );
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
