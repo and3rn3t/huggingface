@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ReactNode } from 'react';
+import { Children, isValidElement, ReactNode } from 'react';
 
 interface PageTransitionProps {
   children: ReactNode;
@@ -80,6 +80,8 @@ const itemVariants = {
 };
 
 export function StaggeredList({ children, className }: StaggeredListProps) {
+  const childArray = Children.toArray(children);
+  
   return (
     <motion.div
       className={className}
@@ -87,11 +89,18 @@ export function StaggeredList({ children, className }: StaggeredListProps) {
       initial="hidden"
       animate="visible"
     >
-      {children.map((child, index) => (
-        <motion.div key={index} variants={itemVariants}>
-          {child}
-        </motion.div>
-      ))}
+      {childArray.map((child, index) => {
+        // Use the child's key if it's a valid element, otherwise use index as fallback
+        const key = isValidElement(child) && child.key !== null 
+          ? child.key 
+          : `staggered-item-${index}`;
+        
+        return (
+          <motion.div key={key} variants={itemVariants}>
+            {child}
+          </motion.div>
+        );
+      })}
     </motion.div>
   );
 }
