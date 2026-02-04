@@ -1,3 +1,4 @@
+import { ThemeToggle } from '@/components/theme-toggle';
 import { TokenSettings } from '@/components/TokenSettings';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -104,10 +105,18 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
       <div className="flex items-center gap-2">
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="relative" aria-label={`Open navigation menu${favoritesCount > 0 ? `, ${favoritesCount} favorites` : ''}`}>
+            <Button
+              variant="outline"
+              size="icon"
+              className="relative"
+              aria-label={`Open navigation menu${favoritesCount > 0 ? `, ${favoritesCount} favorites` : ''}`}
+            >
               <List size={20} aria-hidden="true" />
               {favoritesCount > 0 && (
-                <span className="border-background absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 bg-red-500 text-xs font-medium text-white" aria-hidden="true">
+                <span
+                  className="border-background absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 bg-red-500 text-xs font-medium text-white"
+                  aria-hidden="true"
+                >
                   {favoritesCount}
                 </span>
               )}
@@ -120,14 +129,37 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
 
             <nav className="mt-6 space-y-6" role="navigation" aria-label="Main navigation">
               <div role="group" aria-labelledby="nav-discover-heading">
-                <h3 id="nav-discover-heading" className="text-muted-foreground mb-3 px-3 text-sm font-medium">Discover</h3>
-                <div className="space-y-1" onClick={() => handleTabChange('trending')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('trending')} tabIndex={0} role="button">
+                <h3
+                  id="nav-discover-heading"
+                  className="text-muted-foreground mb-3 px-3 text-sm font-medium"
+                >
+                  Discover
+                </h3>
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('trending')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('trending')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('trending')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('datasets')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('datasets')} tabIndex={0} role="button">
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('datasets')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('datasets')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('datasets')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('models')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('models')} tabIndex={0} role="button">
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('models')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('models')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('models')}
                 </div>
               </div>
@@ -135,14 +167,37 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
               <Separator />
 
               <div role="group" aria-labelledby="nav-tools-heading">
-                <h3 id="nav-tools-heading" className="text-muted-foreground mb-3 px-3 text-sm font-medium">Tools</h3>
-                <div className="space-y-1" onClick={() => handleTabChange('compare')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('compare')} tabIndex={0} role="button">
+                <h3
+                  id="nav-tools-heading"
+                  className="text-muted-foreground mb-3 px-3 text-sm font-medium"
+                >
+                  Tools
+                </h3>
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('compare')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('compare')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('compare')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('playground')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('playground')} tabIndex={0} role="button">
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('playground')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('playground')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('playground')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('learn')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('learn')} tabIndex={0} role="button">
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('learn')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('learn')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('learn')}
                 </div>
               </div>
@@ -150,11 +205,28 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
               <Separator />
 
               <div role="group" aria-labelledby="nav-personal-heading">
-                <h3 id="nav-personal-heading" className="text-muted-foreground mb-3 px-3 text-sm font-medium">Personal</h3>
-                <div className="space-y-1" onClick={() => handleTabChange('favorites')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('favorites')} tabIndex={0} role="button">
+                <h3
+                  id="nav-personal-heading"
+                  className="text-muted-foreground mb-3 px-3 text-sm font-medium"
+                >
+                  Personal
+                </h3>
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('favorites')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('favorites')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('favorites')}
                 </div>
-                <div className="space-y-1" onClick={() => handleTabChange('achievements')} onKeyDown={(e) => e.key === 'Enter' && handleTabChange('achievements')} tabIndex={0} role="button">
+                <div
+                  className="space-y-1"
+                  onClick={() => handleTabChange('achievements')}
+                  onKeyDown={(e) => e.key === 'Enter' && handleTabChange('achievements')}
+                  tabIndex={0}
+                  role="button"
+                >
                   {getNavItem('achievements')}
                 </div>
               </div>
@@ -181,6 +253,7 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
           </div>
         </div>
 
+        <ThemeToggle />
         <TokenSettings
           trigger={
             <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="API Settings">
@@ -292,6 +365,7 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
                 <span className="text-xs">⌘</span>K
               </kbd>
             </Button>
+            <ThemeToggle />
             <TokenSettings
               trigger={
                 <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="API Settings">
