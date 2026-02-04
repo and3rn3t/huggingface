@@ -1,6 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { Code } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
+import { PageTransition } from '@/components/ui/page-transition'
 import { Navigation } from '@/components/Navigation'
 import { QuickNav } from '@/components/QuickNav'
 import { PageBreadcrumb } from '@/components/PageBreadcrumb'
@@ -141,14 +142,16 @@ function App() {
           
           <div className="space-y-6">
             <Suspense fallback={<PageLoader />}>
-              {activeTab === 'trending' && <TrendingSection />}
-              {activeTab === 'datasets' && <DatasetBrowser />}
-              {activeTab === 'models' && <ModelExplorer />}
-              {activeTab === 'compare' && <ModelComparison />}
-              {activeTab === 'favorites' && <FavoritesView />}
-              {activeTab === 'playground' && <ApiPlayground />}
-              {activeTab === 'learn' && <LearningResources />}
-              {activeTab === 'achievements' && <AchievementsPanel />}
+              <PageTransition transitionKey={activeTab}>
+                {activeTab === 'trending' && <TrendingSection />}
+                {activeTab === 'datasets' && <DatasetBrowser />}
+                {activeTab === 'models' && <ModelExplorer />}
+                {activeTab === 'compare' && <ModelComparison />}
+                {activeTab === 'favorites' && <FavoritesView />}
+                {activeTab === 'playground' && <ApiPlayground />}
+                {activeTab === 'learn' && <LearningResources />}
+                {activeTab === 'achievements' && <AchievementsPanel />}
+              </PageTransition>
             </Suspense>
           </div>
         </main>

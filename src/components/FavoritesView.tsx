@@ -8,6 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useAchievements } from '@/hooks/use-achievements';
@@ -128,14 +129,12 @@ export function FavoritesView() {
           <p className="text-muted-foreground">Your saved datasets and models in one place</p>
         </div>
 
-        <div className="py-16 text-center">
-          <Heart className="text-muted-foreground mx-auto mb-4" size={64} />
-          <h3 className="mb-2 text-xl font-medium">No favorites yet</h3>
-          <p className="text-muted-foreground mx-auto max-w-md">
-            Start exploring datasets and models, then click the heart icon to save your favorites
-            here for quick access
-          </p>
-        </div>
+        <EmptyState
+          icon={Heart}
+          title="No favorites yet"
+          description="Start exploring datasets and models, then click the heart icon to save your favorites here for quick access"
+          iconColor="text-red-400"
+        />
       </div>
     );
   }

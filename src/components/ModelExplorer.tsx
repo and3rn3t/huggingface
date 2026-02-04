@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { InlineEmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -292,21 +293,19 @@ export function ModelExplorer() {
           )}
 
           {!isLoading && displayModels.length === 0 && activeTab === 'all' && (
-            <div className="py-12 text-center">
-              <Cpu className="text-muted-foreground mx-auto mb-4" size={48} />
-              <h3 className="mb-2 text-lg font-medium">No models found</h3>
-              <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
-            </div>
+            <InlineEmptyState
+              icon={Cpu}
+              title="No models found"
+              description="Try adjusting your filters or search terms"
+            />
           )}
 
           {!isLoading && displayModels.length === 0 && activeTab === 'favorites' && (
-            <div className="py-12 text-center">
-              <Heart className="text-muted-foreground mx-auto mb-4" size={48} />
-              <h3 className="mb-2 text-lg font-medium">No favorites yet</h3>
-              <p className="text-muted-foreground">
-                Click the heart icon on any model to save it to your favorites
-              </p>
-            </div>
+            <InlineEmptyState
+              icon={Heart}
+              title="No favorites yet"
+              description="Click the heart icon on any model to save it to your favorites"
+            />
           )}
         </TabsContent>
       </Tabs>
