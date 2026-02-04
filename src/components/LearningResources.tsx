@@ -495,7 +495,10 @@ export function LearningResources() {
                                 {currentLesson.quiz.options.map((option, idx) => (
                                   <button
                                     key={idx}
-                                    onClick={() => setSelectedAnswer(idx)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedAnswer(idx);
+                                    }}
                                     disabled={showExplanation}
                                     className={`w-full rounded-lg border p-3 text-left text-sm transition-all ${
                                       selectedAnswer === idx
@@ -532,7 +535,8 @@ export function LearningResources() {
                               <div className="flex gap-2">
                                 {!showExplanation ? (
                                   <Button
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       if (selectedAnswer !== null) {
                                         handleQuizSubmit(
                                           currentLesson.id,
@@ -549,7 +553,10 @@ export function LearningResources() {
                                 ) : (
                                   <>
                                     <Button
-                                      onClick={resetQuiz}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        resetQuiz();
+                                      }}
                                       variant="outline"
                                       size="sm"
                                       className="flex-1"
@@ -558,7 +565,10 @@ export function LearningResources() {
                                     </Button>
                                     {!isCompleted && (
                                       <Button
-                                        onClick={() => handleLessonComplete(currentLesson.id)}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleLessonComplete(currentLesson.id);
+                                        }}
                                         className="flex-1"
                                         size="sm"
                                       >
