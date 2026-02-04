@@ -18,6 +18,7 @@ import {
 } from '@phosphor-icons/react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { ReadmeViewer } from './ReadmeViewer';
 
 interface Dataset {
   id: string;
@@ -394,6 +395,13 @@ dataset = load_dataset("${selectedDataset.id}")`}
                   <span className="font-medium">❤️ {selectedDataset.likes}</span>
                 </div>
               </div>
+
+              <ReadmeViewer
+                resourceId={selectedDataset.id}
+                type="dataset"
+                maxHeight="300px"
+                className="mt-4"
+              />
             </div>
           )}
         </DialogContent>
