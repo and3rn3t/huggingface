@@ -20,6 +20,16 @@ import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import { useAchievements } from '@/hooks/use-achievements'
 import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  generateText, 
+  summarizeText, 
+  classifyText, 
+  answerQuestion, 
+  translateText, 
+  runInference,
+  hasToken 
+} from '@/services/huggingface'
+import { useApiError } from '@/hooks/use-api-error'
 
 interface PlaygroundTask {
   id: string
@@ -160,6 +170,7 @@ export function ApiPlayground() {
   const [savedPrompts = [], setSavedPrompts] = useKV<{ id: string; name: string; taskId: string; prompt: string }[]>('saved-prompts', [])
   
   const { trackPlaygroundRun } = useAchievements()
+  const { showError } = useApiError()
 
   const handleTaskChange = (taskId: string) => {
     const task = PLAYGROUND_TASKS.find(t => t.id === taskId)
@@ -223,8 +234,20 @@ export function ApiPlayground() {
       return
     }
 
+    if (!hasToken()) {
+      toast.error('API token required', {
+        description: 'Please configure your HuggingFace API token in settings.',
+        action: {
+          label: 'Settings',
+          onClick: () => window.dispatchEvent(new CustomEvent('open-token-settings')),
+        },
+      })
+      return
+    }
+
     setIsLoading(true)
     setProgress(0)
+    setOutput('')
     const startTime = Date.now()
 
     const progressInterval = setInterval(() => {
@@ -234,48 +257,107 @@ export function ApiPlayground() {
       })
     }, 200)
 
-    await new Promise(resolve => setTimeout(resolve, 1500 + Math.random() * 1000))
+    try {
+      let result: unknown
 
-    clearInterval(progressInterval)
-    setProgress(100)
+      switch (selectedTask.id) {
+        case 'text-generation':
+        case 'code-generation': {
+          const response = await generateText(selectedModel, input, {
+            max_new_tokens: maxTokens[0],
+            temperature: temperature[0],
+            top_p: topP[0],
+          })
+          result = response[0]?.generated_text || JSON.stringify(response, null, 2)
+          break
+        }
+        case 'summarization': {
+          const response = await summarizeText(selectedModel, input, {
+            max_length: maxTokens[0],
+          })
+          result = response[0]?.summary_text || JSON.stringify(response, null, 2)
+          break
+        }
+        case 'sentiment-analysis': {
+          const response = await classifyText(selectedModel, input)
+          result = JSON.stringify(response, null, 2)
+          break
+        }
+        case 'question-answering': {
+          // Parse input to extract context and question
+          const parts = input.split('\nQuestion:')
+          const context = parts[0].replace(/^Context:\s*/i, '').trim()
+          const question = parts[1]?.trim() || input
+          const response = await answerQuestion(selectedModel, question, context)
+          result = JSON.stringify(response, null, 2)
+          break
+        }
+        case 'translation': {
+          const response = await translateText(selectedModel, input)
+          result = response[0]?.translation_text || JSON.stringify(response, null, 2)
+          break
+        }
+        case 'image-classification': {
+          const response = await runInference(selectedModel, {
+            inputs: input,
+            options: { wait_for_model: true },
+          })
+          result = JSON.stringify(response, null, 2)
+          break
+        }
+        case 'conversational': {
+          const response = await runInference(selectedModel, {
+            inputs: {
+              text: input,
+              past_user_inputs: [],
+              generated_responses: [],
+            },
+            options: { wait_for_model: true },
+          })
+          result = typeof response === 'object' && response !== null && 'generated_text' in response
+            ? (response as { generated_text: string }).generated_text
+            : JSON.stringify(response, null, 2)
+          break
+        }
+        default:
+          result = 'Task not supported'
+      }
 
-    const mockOutputs: Record<string, string> = {
-      'text-generation': input + ' there lived a brave knight who sought adventure and glory. The kingdom was peaceful, but rumors of a dragon stirring in the mountains had reached the castle. As dawn broke over the realm, the knight prepared for the journey ahead, knowing that destiny awaited.',
-      'summarization': 'The Eiffel Tower is a 324-meter tall iron structure in Paris, equivalent to an 81-storey building with a 125-meter square base.',
-      'sentiment-analysis': '{\n  "label": "POSITIVE",\n  "score": 0.9998,\n  "confidence": "Very High"\n}',
-      'question-answering': '{\n  "answer": "Paris",\n  "score": 0.9876,\n  "start": 0,\n  "end": 5,\n  "confidence": "High"\n}',
-      'translation': 'Bonjour, comment allez-vous aujourd\'hui?',
-      'image-classification': '{\n  "labels": [\n    {"label": "Golden Retriever", "score": 0.94},\n    {"label": "Labrador", "score": 0.05},\n    {"label": "Dog", "score": 0.01}\n  ]\n}',
-      'conversational': 'Of course! I\'d be happy to help you with your coding question. What would you like to know? Whether it\'s debugging, algorithm design, or learning a new language, I\'m here to assist.',
-      'code-generation': 'def sort_numbers(numbers):\n    """\n    Sorts an array of numbers in ascending order.\n    \n    Args:\n        numbers: List of numbers to sort\n    \n    Returns:\n        Sorted list in ascending order\n    """\n    return sorted(numbers)\n\n# Example usage:\nmy_numbers = [64, 34, 25, 12, 22, 11, 90]\nsorted_numbers = sort_numbers(my_numbers)\nprint(sorted_numbers)  # [11, 12, 22, 25, 34, 64, 90]'
+      clearInterval(progressInterval)
+      setProgress(100)
+
+      const execTime = Date.now() - startTime
+      setExecutionTime(execTime)
+
+      const outputString = typeof result === 'string' ? result : JSON.stringify(result, null, 2)
+      setOutput(outputString)
+      setIsLoading(false)
+
+      setHistory((current = []) => [
+        {
+          id: Date.now().toString(),
+          taskId: selectedTask.id,
+          taskName: selectedTask.name,
+          input: input.slice(0, 100),
+          output: outputString.slice(0, 100),
+          timestamp: Date.now(),
+          executionTime: execTime,
+          model: selectedModel,
+        },
+        ...current.slice(0, 9),
+      ])
+
+      trackPlaygroundRun()
+
+      toast.success('API call completed!', {
+        description: `Executed in ${execTime}ms`,
+      })
+    } catch (error) {
+      clearInterval(progressInterval)
+      setProgress(0)
+      setIsLoading(false)
+      showError(error)
     }
-
-    const execTime = Date.now() - startTime
-    setExecutionTime(execTime)
-    
-    const result = mockOutputs[selectedTask.id] || 'Task completed successfully!'
-    setOutput(result)
-    setIsLoading(false)
-
-    setHistory((current = []) => [
-      {
-        id: Date.now().toString(),
-        taskId: selectedTask.id,
-        taskName: selectedTask.name,
-        input: input.slice(0, 100),
-        output: result.slice(0, 100),
-        timestamp: Date.now(),
-        executionTime: execTime,
-        model: selectedModel
-      },
-      ...current.slice(0, 9)
-    ])
-
-    trackPlaygroundRun()
-
-    toast.success('API call completed!', {
-      description: `Executed in ${execTime}ms`
-    })
   }
 
   const copyOutput = () => {

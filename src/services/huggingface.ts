@@ -88,8 +88,14 @@ export type InferenceTask =
   | 'automatic-speech-recognition'
   | 'audio-classification';
 
+export interface ConversationalInput {
+  text: string;
+  past_user_inputs?: string[];
+  generated_responses?: string[];
+}
+
 export interface InferenceInput {
-  inputs: string | string[] | Record<string, string>;
+  inputs: string | string[] | Record<string, string> | ConversationalInput;
   parameters?: Record<string, unknown>;
   options?: {
     use_cache?: boolean;
