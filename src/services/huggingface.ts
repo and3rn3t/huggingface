@@ -167,8 +167,9 @@ export function hasToken(): boolean {
 // API Client
 // =============================================================================
 
-const HF_API_BASE = 'https://huggingface.co/api';
-const HF_INFERENCE_BASE = 'https://api-inference.huggingface.co/models';
+// Use Cloudflare Pages Functions proxy to avoid CORS issues
+const HF_API_BASE = '/api';
+const HF_INFERENCE_BASE = '/api/inference';
 
 /**
  * Create headers for API requests
