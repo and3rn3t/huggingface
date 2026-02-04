@@ -75,11 +75,12 @@ export async function onRequest(context: {
 
     const response = await fetch(proxyRequest);
 
-    // For debugging: log response status for inference requests
-    if (pathSegments[0] === 'inference' && !response.ok) {
-      console.error(
-        `Inference API error: ${response.status} ${response.statusText} for ${targetUrl}`
-      );
+    // For debugging: log response status and body for errors
+    if (!response.ok) {
+      const responseClone = response.clone();
+      const errorBody = await responseClone.text();
+      console.error(`API error: ${response.status} ${response.statusText} for ${targetUrl}`);
+      console.error(`Error body: ${errorBody.substring(0, 500)}`);
       const hasAuth = authHeader || env.VITE_HF_TOKEN;
       console.error(`Authorization present: ${!!hasAuth}`);
     }
