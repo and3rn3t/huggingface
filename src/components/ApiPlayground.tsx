@@ -58,8 +58,9 @@ import {
   Trash,
 } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import DOMPurify from 'dompurify';
 
 const PLAYGROUND_TASKS: PlaygroundTask[] = [
   {
@@ -387,6 +388,137 @@ export function ApiPlayground() {
     toast.success('Output downloaded!');
   };
 
+  const sharePlayground = () => {
+    try {
+      const url = new URL(window.location.href);
+      url.searchParams.set('task', selectedTask.id);
+      url.searchParams.set('model', selectedModel);
+      url.searchParams.set('prompt', encodeURIComponent(input));
+      
+      if (selectedTask.parameters?.temperature) {
+        url.searchParams.set('temp', temperature[0].toString());
+      }
+      if (selectedTask.parameters?.maxTokens) {
+        url.searchParams.set('tokens', maxTokens[0].toString());
+      }
+      if (selectedTask.parameters?.topP) {
+        url.searchParams.set('topP', topP[0].toString());
+      }
+
+      if (output) {
+        const MAX_RESULT_LENGTH = 2000;
+        const truncatedOutput = output.slice(0, MAX_RESULT_LENGTH);
+        url.searchParams.set('result', encodeURIComponent(truncatedOutput));
+        url.searchParams.set('time', executionTime.toString());
+
+        if (output.length > MAX_RESULT_LENGTH) {
+          toast.warning('Result truncated in share URL', {
+            description: `Only first ${MAX_RESULT_LENGTH} characters included due to URL length limits`,
+          });
+        }
+      }
+
+      navigator.clipboard.writeText(url.toString());
+      toast.success('Share link copied to clipboard!', {
+        description: 'Anyone can use this link to load your playground state',
+      });
+    } catch (error) {
+      toast.error('Failed to create share link');
+    }
+  };
+
+  // Restore state from URL params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    const taskParam = params.get('task');
+    const modelParam = params.get('model');
+    const promptParam = params.get('prompt');
+    const resultParam = params.get('result');
+    const timeParam = params.get('time');
+    const tempParam = params.get('temp');
+    const tokensParam = params.get('tokens');
+    const topPParam = params.get('topP');
+
+    if (taskParam) {
+      // Sanitize and validate task ID
+      const sanitizedTaskId = DOMPurify.sanitize(taskParam, { ALLOWED_TAGS: [] });
+      const validTaskIds = PLAYGROUND_TASKS.map(t => t.id);
+      
+      if (validTaskIds.includes(sanitizedTaskId)) {
+        const task = PLAYGROUND_TASKS.find(t => t.id === sanitizedTaskId);
+        if (task) {
+          setSelectedTask(task);
+
+          // Restore model if valid for this task
+          if (modelParam) {
+            const sanitizedModel = DOMPurify.sanitize(modelParam, { ALLOWED_TAGS: [] });
+            if (task.models.includes(sanitizedModel)) {
+              setSelectedModel(sanitizedModel);
+            } else {
+              setSelectedModel(task.models[0]);
+            }
+          }
+
+          // Restore prompt
+          if (promptParam) {
+            try {
+              const decodedPrompt = decodeURIComponent(promptParam);
+              const sanitizedPrompt = DOMPurify.sanitize(decodedPrompt, { ALLOWED_TAGS: [] });
+              setInput(sanitizedPrompt);
+            } catch (e) {
+              console.error('Failed to decode prompt:', e);
+            }
+          }
+
+          // Restore result and execution time
+          if (resultParam) {
+            try {
+              const decodedResult = decodeURIComponent(resultParam);
+              const sanitizedResult = DOMPurify.sanitize(decodedResult, { ALLOWED_TAGS: [] });
+              setOutput(sanitizedResult);
+              setProgress(100);
+
+              if (timeParam) {
+                const time = parseInt(timeParam, 10);
+                if (!isNaN(time) && time >= 0) {
+                  setExecutionTime(time);
+                }
+              }
+            } catch (e) {
+              console.error('Failed to decode result:', e);
+            }
+          }
+
+          // Restore parameters
+          if (tempParam) {
+            const temp = parseFloat(tempParam);
+            if (!isNaN(temp) && temp >= 0 && temp <= 2) {
+              setTemperature([temp]);
+            }
+          }
+          if (tokensParam) {
+            const tokens = parseInt(tokensParam, 10);
+            if (!isNaN(tokens) && tokens > 0 && tokens <= 2000) {
+              setMaxTokens([tokens]);
+            }
+          }
+          if (topPParam) {
+            const topP = parseFloat(topPParam);
+            if (!isNaN(topP) && topP >= 0 && topP <= 1) {
+              setTopP([topP]);
+            }
+          }
+
+          // Clear URL params after loading
+          window.history.replaceState({}, '', window.location.pathname);
+
+          toast.info('Playground state loaded from share link');
+        }
+      }
+    }
+  }, []); // Only run on mount
+
   const filteredTasks = PLAYGROUND_TASKS.filter((t) => t.category === activeCategory);
 
   return (
@@ -407,7 +539,7 @@ export function ApiPlayground() {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2" onClick={sharePlayground}>
               <Share />
               Share
             </Button>

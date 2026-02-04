@@ -1,7 +1,7 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { useAchievements } from './use-achievements';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { toast } from 'sonner';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useAchievements } from './use-achievements';
 
 // Mock sonner toast
 vi.mock('sonner', () => ({
@@ -28,18 +28,22 @@ describe('useAchievements', () => {
 
     it('should preserve existing achievements on subsequent runs', () => {
       const { result, rerender } = renderHook(() => useAchievements());
-      
+
       // Update an achievement
       act(() => {
         result.current.trackPlaygroundRun();
       });
 
-      const firstProgress = result.current.achievements.find(a => a.id === 'first-experiment')?.progress;
-      
+      const firstProgress = result.current.achievements.find(
+        (a) => a.id === 'first-experiment'
+      )?.progress;
+
       // Rerender
       rerender();
 
-      const secondProgress = result.current.achievements.find(a => a.id === 'first-experiment')?.progress;
+      const secondProgress = result.current.achievements.find(
+        (a) => a.id === 'first-experiment'
+      )?.progress;
       expect(secondProgress).toBe(firstProgress);
     });
 
@@ -89,7 +93,7 @@ describe('useAchievements', () => {
 
       // Trigger today's activity
       const { result: result2 } = renderHook(() => useAchievements());
-      
+
       act(() => {
         result2.current.trackPlaygroundRun();
       });
@@ -127,13 +131,13 @@ describe('useAchievements', () => {
           lastActiveDate: threeDaysAgoStr,
           currentStreak: 5,
           longestStreak: 5,
-          daysActive: [Date.now() - (3 * 86400000)],
+          daysActive: [Date.now() - 3 * 86400000],
         };
         localStorage.setItem('user-stats', JSON.stringify(stats));
       });
 
       const { result: result2 } = renderHook(() => useAchievements());
-      
+
       act(() => {
         result2.current.trackPlaygroundRun();
       });
@@ -189,7 +193,8 @@ describe('useAchievements', () => {
       const after = Date.now();
 
       expect(result.current.stats.daysActive.length).toBeGreaterThan(0);
-      const lastActive = result.current.stats.daysActive[result.current.stats.daysActive.length - 1];
+      const lastActive =
+        result.current.stats.daysActive[result.current.stats.daysActive.length - 1];
       expect(lastActive).toBeGreaterThanOrEqual(before);
       expect(lastActive).toBeLessThanOrEqual(after);
     });
@@ -203,7 +208,7 @@ describe('useAchievements', () => {
         result.current.trackPlaygroundRun();
       });
 
-      const achievement = result.current.achievements.find(a => a.id === 'first-experiment');
+      const achievement = result.current.achievements.find((a) => a.id === 'first-experiment');
       expect(achievement?.unlockedAt).toBeDefined();
     });
 
@@ -228,7 +233,7 @@ describe('useAchievements', () => {
         result.current.trackPlaygroundRun();
       });
 
-      const achievement = result.current.achievements.find(a => a.id === 'first-experiment');
+      const achievement = result.current.achievements.find((a) => a.id === 'first-experiment');
       const after = Date.now();
 
       expect(achievement?.unlockedAt).toBeGreaterThanOrEqual(before);
@@ -242,13 +247,17 @@ describe('useAchievements', () => {
         result.current.trackPlaygroundRun();
       });
 
-      const firstUnlockTime = result.current.achievements.find(a => a.id === 'first-experiment')?.unlockedAt;
+      const firstUnlockTime = result.current.achievements.find(
+        (a) => a.id === 'first-experiment'
+      )?.unlockedAt;
 
       act(() => {
         result.current.trackPlaygroundRun();
       });
 
-      const secondUnlockTime = result.current.achievements.find(a => a.id === 'first-experiment')?.unlockedAt;
+      const secondUnlockTime = result.current.achievements.find(
+        (a) => a.id === 'first-experiment'
+      )?.unlockedAt;
 
       expect(firstUnlockTime).toBe(secondUnlockTime);
     });
@@ -260,7 +269,7 @@ describe('useAchievements', () => {
         result.current.trackPlaygroundRun();
       });
 
-      const achievement = result.current.achievements.find(a => a.id === 'api-explorer');
+      const achievement = result.current.achievements.find((a) => a.id === 'api-explorer');
       expect(achievement?.progress).toBe(1);
       expect(achievement?.unlockedAt).toBeUndefined();
     });
@@ -291,11 +300,11 @@ describe('useAchievements', () => {
       });
 
       const experimenterAchievements = result.current.achievements.filter(
-        a => a.category === 'experimenter'
+        (a) => a.category === 'experimenter'
       );
 
       expect(experimenterAchievements.length).toBe(4);
-      experimenterAchievements.forEach(achievement => {
+      experimenterAchievements.forEach((achievement) => {
         expect(achievement.progress).toBeGreaterThan(0);
       });
     });
@@ -329,7 +338,7 @@ describe('useAchievements', () => {
         result.current.trackFavorite(5);
       });
 
-      const collector = result.current.achievements.find(a => a.id === 'collector');
+      const collector = result.current.achievements.find((a) => a.id === 'collector');
       expect(collector?.unlockedAt).toBeDefined();
     });
 
@@ -350,7 +359,7 @@ describe('useAchievements', () => {
         result.current.trackLessonComplete(1);
       });
 
-      const firstSteps = result.current.achievements.find(a => a.id === 'first-steps');
+      const firstSteps = result.current.achievements.find((a) => a.id === 'first-steps');
       expect(firstSteps?.unlockedAt).toBeDefined();
     });
 
@@ -371,7 +380,7 @@ describe('useAchievements', () => {
         result.current.trackQuizPass(5);
       });
 
-      const quizMaster = result.current.achievements.find(a => a.id === 'quiz-master');
+      const quizMaster = result.current.achievements.find((a) => a.id === 'quiz-master');
       expect(quizMaster?.unlockedAt).toBeDefined();
     });
 
@@ -395,7 +404,7 @@ describe('useAchievements', () => {
         result.current.trackLessonComplete(5);
       });
 
-      const unlockedCount = result.current.achievements.filter(a => a.unlockedAt).length;
+      const unlockedCount = result.current.achievements.filter((a) => a.unlockedAt).length;
       expect(unlockedCount).toBeGreaterThan(1);
     });
 
@@ -406,12 +415,12 @@ describe('useAchievements', () => {
         result.current.trackPlaygroundRun();
       });
 
-      const progress1 = result.current.achievements.find(a => a.id === 'api-explorer')?.progress;
+      const progress1 = result.current.achievements.find((a) => a.id === 'api-explorer')?.progress;
 
       // Simulate new session
       const { result: result2 } = renderHook(() => useAchievements());
 
-      const progress2 = result2.current.achievements.find(a => a.id === 'api-explorer')?.progress;
+      const progress2 = result2.current.achievements.find((a) => a.id === 'api-explorer')?.progress;
 
       expect(progress2).toBe(progress1);
     });
@@ -451,11 +460,11 @@ describe('useAchievements', () => {
       const { result } = renderHook(() => useAchievements());
 
       const experimenterAchievements = result.current.achievements.filter(
-        a => a.category === 'experimenter'
+        (a) => a.category === 'experimenter'
       );
 
       expect(experimenterAchievements.length).toBeGreaterThan(0);
-      experimenterAchievements.forEach(a => {
+      experimenterAchievements.forEach((a) => {
         expect(a.category).toBe('experimenter');
       });
     });
