@@ -3,7 +3,7 @@
  *
  * Proxies requests to HuggingFace API to avoid CORS issues.
  * All requests to /api/* are forwarded to huggingface.co/api/*
- * All requests to /api/inference/* are forwarded to router.huggingface.co/models/*
+ * All requests to /api/inference/* are converted to the new chat completions API
  */
 
 interface Env {
@@ -11,7 +11,7 @@ interface Env {
 }
 
 const HF_API_BASE = 'https://huggingface.co/api';
-const HF_INFERENCE_BASE = 'https://router.huggingface.co/models';
+const HF_CHAT_COMPLETIONS = 'https://router.huggingface.co/v1/chat/completions';
 
 export async function onRequest(context: {
   request: Request;
@@ -34,25 +34,92 @@ export async function onRequest(context: {
   }
 
   try {
-    // Build the target URL
     const pathSegments = params.path || [];
-    let targetUrl: string;
 
-    if (pathSegments[0] === 'inference') {
-      // Inference API: /api/inference/model-name -> https://router.huggingface.co/models/model-name
-      const modelPath = pathSegments.slice(1).join('/');
-      targetUrl = `${HF_INFERENCE_BASE}/${modelPath}${url.search}`;
-    } else {
-      // Regular API: /api/models -> https://huggingface.co/api/models
-      const apiPath = pathSegments.join('/');
-      targetUrl = `${HF_API_BASE}/${apiPath}${url.search}`;
+    // Handle inference requests - convert to new chat completions API
+    if (pathSegments[0] === 'inference' && request.method === 'POST') {
+      const modelId = pathSegments.slice(1).join('/');
+      const oldBody = (await request.json()) as any;
+
+      // Convert old format to chat completions format
+      const prompt =
+        typeof oldBody.inputs === 'string' ? oldBody.inputs : JSON.stringify(oldBody.inputs);
+
+      const newBody = {
+        model: modelId,
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        max_tokens: oldBody.parameters?.max_new_tokens || oldBody.parameters?.max_length || 100,
+        temperature: oldBody.parameters?.temperature || 0.7,
+        stream: false,
+      };
+
+      // Get auth token
+      const authHeader = request.headers.get('Authorization');
+      const token = authHeader?.replace('Bearer ', '') || env.VITE_HF_TOKEN;
+
+      if (!token) {
+        return new Response(JSON.stringify({ error: 'No authorization token provided' }), {
+          status: 401,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+
+      const response = await fetch(HF_CHAT_COMPLETIONS, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newBody),
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`Chat completions error: ${response.status} ${response.statusText}`);
+        console.error(`Error body: ${errorBody.substring(0, 500)}`);
+
+        return new Response(errorBody, {
+          status: response.status,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+
+      const chatResponse = (await response.json()) as any;
+
+      // Convert back to old format for backward compatibility
+      const oldFormatResponse = [
+        {
+          generated_text: chatResponse.choices?.[0]?.message?.content || '',
+        },
+      ];
+
+      return new Response(JSON.stringify(oldFormatResponse), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
     }
 
-    // Forward headers
+    // Regular API requests (non-inference)
+    const apiPath = pathSegments.join('/');
+    const targetUrl = `${HF_API_BASE}/${apiPath}${url.search}`;
+
     const headers = new Headers();
     headers.set('Content-Type', request.headers.get('Content-Type') || 'application/json');
 
-    // Add authorization token from request or environment
     const authHeader = request.headers.get('Authorization');
     if (authHeader) {
       headers.set('Authorization', authHeader);
@@ -60,10 +127,8 @@ export async function onRequest(context: {
       headers.set('Authorization', `Bearer ${env.VITE_HF_TOKEN}`);
     }
 
-    // Forward user-agent
     headers.set('User-Agent', 'Cloudflare-Pages-Proxy/1.0');
 
-    // Make the proxied request
     const proxyRequest = new Request(targetUrl, {
       method: request.method,
       headers,
@@ -75,17 +140,6 @@ export async function onRequest(context: {
 
     const response = await fetch(proxyRequest);
 
-    // For debugging: log response status and body for errors
-    if (!response.ok) {
-      const responseClone = response.clone();
-      const errorBody = await responseClone.text();
-      console.error(`API error: ${response.status} ${response.statusText} for ${targetUrl}`);
-      console.error(`Error body: ${errorBody.substring(0, 500)}`);
-      const hasAuth = authHeader || env.VITE_HF_TOKEN;
-      console.error(`Authorization present: ${!!hasAuth}`);
-    }
-
-    // Clone response to modify headers
     const responseHeaders = new Headers(response.headers);
     responseHeaders.set('Access-Control-Allow-Origin', '*');
     responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -97,6 +151,7 @@ export async function onRequest(context: {
       headers: responseHeaders,
     });
   } catch (error) {
+    console.error('Proxy error:', error);
     return new Response(
       JSON.stringify({
         error: 'Proxy error',
