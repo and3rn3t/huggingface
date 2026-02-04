@@ -1,8 +1,29 @@
 {
-  "name": "spark-template",
+  "name": "huggingface-playground",
+  "description": "An interactive learning platform for exploring HuggingFace's ecosystem — browse datasets, discover models, and experiment with AI APIs",
+  "version": "1.0.0",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "author": {
+    "name": "Matthew Anderson",
+    "email": "and3rn3t@icloud.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andernet/huggingface.git"
+  },
+  "homepage": "https://hug.andernet.dev",
+  "license": "MIT",
+  "keywords": [
+    "huggingface",
+    "machine-learning",
+    "ai",
+    "datasets",
+    "models",
+    "playground",
+    "react",
+    "typescript"
+  ],
   "scripts": {
     "dev": "vite",
     "kill": "fuser -k 5000/tcp",

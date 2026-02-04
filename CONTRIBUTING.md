@@ -7,7 +7,7 @@ Thank you for your interest in contributing! This document provides guidelines a
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/huggingface.git
+   git clone https://github.com/andernet/huggingface.git
    cd huggingface
    ```
 3. Install dependencies:
