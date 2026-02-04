@@ -1,7 +1,5 @@
-import { Navigation } from '@/components/Navigation';
-import { PageBreadcrumb } from '@/components/PageBreadcrumb';
-import { QuickNav } from '@/components/QuickNav';
-import { StatsWidget } from '@/components/StatsWidget';
+import { Navigation, PageBreadcrumb, QuickNav } from '@/components/layout';
+import { StatsWidget } from '@/components/features/trending';
 import { PageTransition } from '@/components/ui/page-transition';
 import { Toaster } from '@/components/ui/sonner';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -30,28 +28,28 @@ const lazyWithRetry = (componentImport: () => Promise<any>) =>
 
 // Lazy load heavy components for better initial load performance
 const DatasetBrowser = lazyWithRetry(() =>
-  import('@/components/DatasetBrowser').then((m) => ({ default: m.DatasetBrowser }))
+  import('@/components/features/datasets').then((m) => ({ default: m.DatasetBrowser }))
 );
 const ModelExplorer = lazyWithRetry(() =>
-  import('@/components/ModelExplorer').then((m) => ({ default: m.ModelExplorer }))
+  import('@/components/features/models').then((m) => ({ default: m.ModelExplorer }))
 );
 const ApiPlayground = lazyWithRetry(() =>
-  import('@/components/ApiPlayground').then((m) => ({ default: m.ApiPlayground }))
+  import('@/components/features/playground').then((m) => ({ default: m.ApiPlayground }))
 );
 const LearningResources = lazyWithRetry(() =>
-  import('@/components/LearningResources').then((m) => ({ default: m.LearningResources }))
+  import('@/components/features/learning').then((m) => ({ default: m.LearningResources }))
 );
 const FavoritesView = lazyWithRetry(() =>
-  import('@/components/FavoritesView').then((m) => ({ default: m.FavoritesView }))
+  import('@/components/features/favorites').then((m) => ({ default: m.FavoritesView }))
 );
 const ModelComparison = lazyWithRetry(() =>
-  import('@/components/ModelComparison').then((m) => ({ default: m.ModelComparison }))
+  import('@/components/features/comparison').then((m) => ({ default: m.ModelComparison }))
 );
 const TrendingSection = lazyWithRetry(() =>
-  import('@/components/TrendingSection').then((m) => ({ default: m.TrendingSection }))
+  import('@/components/features/trending').then((m) => ({ default: m.TrendingSection }))
 );
 const AchievementsPanel = lazyWithRetry(() =>
-  import('@/components/AchievementsPanel').then((m) => ({ default: m.AchievementsPanel }))
+  import('@/components/features/achievements').then((m) => ({ default: m.AchievementsPanel }))
 );
 
 // Loading fallback component

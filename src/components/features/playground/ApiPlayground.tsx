@@ -1,4 +1,4 @@
-import { FeaturedModal } from '@/components/FeaturedModal';
+import { FeaturedModal } from '@/components/common';
 import {
   CodeExamples,
   ExecutionHistory,
@@ -8,7 +8,7 @@ import {
   PlaygroundTask,
   SavedPrompts,
   TaskCard,
-} from '@/components/playground';
+} from '@/components/features/playground';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';

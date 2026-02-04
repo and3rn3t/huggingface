@@ -1,4 +1,4 @@
-import { StreakTracker } from '@/components/StreakTracker';
+import { StreakTracker } from '@/components/features/achievements';
 import {
   Accordion,
   AccordionContent,

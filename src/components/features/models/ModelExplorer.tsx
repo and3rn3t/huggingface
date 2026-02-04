@@ -21,7 +21,7 @@ import { HFModel, HFModelSearchParams } from '@/services/huggingface';
 import { ArrowClockwise, Copy, Cpu, Heart, MagnifyingGlass, Sparkle } from '@phosphor-icons/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { ReadmeViewer } from './ReadmeViewer';
+import { ReadmeViewer } from '@/components/common';
 
 interface Model {
   id: string;

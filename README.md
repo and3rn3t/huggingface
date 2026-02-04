@@ -38,21 +38,21 @@ npm run preview
 
 ## 🔧 Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Fix ESLint errors |
-| `npm run format` | Format code with Prettier |
-| `npm run format:check` | Check code formatting |
-| `npm run type-check` | Run TypeScript type checking |
-| `npm run test` | Run tests with Vitest |
-| `npm run test:ui` | Run tests with UI |
-| `npm run coverage` | Generate test coverage report |
-| `npm run generate-og` | Generate social sharing images |
-| `npm run clean` | Clean dist and cache |
+| Script                 | Description                    |
+| ---------------------- | ------------------------------ |
+| `npm run dev`          | Start development server       |
+| `npm run build`        | Build for production           |
+| `npm run preview`      | Preview production build       |
+| `npm run lint`         | Run ESLint                     |
+| `npm run lint:fix`     | Fix ESLint errors              |
+| `npm run format`       | Format code with Prettier      |
+| `npm run format:check` | Check code formatting          |
+| `npm run type-check`   | Run TypeScript type checking   |
+| `npm run test`         | Run tests with Vitest          |
+| `npm run test:ui`      | Run tests with UI              |
+| `npm run coverage`     | Generate test coverage report  |
+| `npm run generate-og`  | Generate social sharing images |
+| `npm run clean`        | Clean dist and cache           |
 
 ## 🔑 API Configuration
 
@@ -67,14 +67,35 @@ Tokens are stored securely in your browser's localStorage.
 ## 🏗️ Project Structure
 
 ```
-src/
-├── components/          # React components
-│   ├── ui/             # Reusable UI components (shadcn/ui)
-│   └── playground/     # API Playground subcomponents
-├── hooks/              # Custom React hooks
-├── services/           # API service layer
-├── lib/                # Utility functions
-└── styles/             # Global styles
+├── docs/                  # Documentation files
+│   ├── DEPLOYMENT.md      # Cloudflare deployment guide
+│   ├── PRD.md             # Product requirements document
+│   └── SECURITY.md        # Security policy
+├── functions/             # Cloudflare Pages Functions
+│   └── api/               # API proxy routes
+├── public/                # Static assets (icons, PWA assets)
+├── scripts/               # Build and utility scripts
+├── src/
+│   ├── components/
+│   │   ├── common/        # Shared reusable components
+│   │   ├── features/      # Feature-specific components
+│   │   │   ├── achievements/
+│   │   │   ├── comparison/
+│   │   │   ├── datasets/
+│   │   │   ├── favorites/
+│   │   │   ├── learning/
+│   │   │   ├── models/
+│   │   │   ├── playground/
+│   │   │   └── trending/
+│   │   ├── layout/        # Navigation, theme, layout components
+│   │   └── ui/            # Base UI components (shadcn/ui)
+│   ├── hooks/             # Custom React hooks
+│   ├── lib/               # Utility functions
+│   ├── services/          # API service layer
+│   ├── styles/            # Global styles
+│   └── test/              # Test setup and utilities
+└── tests/                 # End-to-end tests
+    └── e2e/               # Playwright E2E tests
 ```
 
 ## 🛠️ Tech Stack
@@ -111,10 +132,20 @@ The app can be installed as a Progressive Web App:
 
 ## 🤝 Contributing
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
+
 1. Create a feature branch from `main`
 2. Make your changes
 3. Run `npm run lint && npm run type-check`
 4. Submit a pull request
+
+## 📚 Documentation
+
+- [Contributing Guide](CONTRIBUTING.md) - How to contribute to this project
+- [Deployment Guide](docs/DEPLOYMENT.md) - Cloudflare Pages deployment setup
+- [Product Requirements](docs/PRD.md) - Feature specifications and planning
+- [Security Policy](docs/SECURITY.md) - Reporting security vulnerabilities
+- [Architecture](docs/ARCHITECTURE.md) - Technical architecture overview
 
 ## 📄 License
 

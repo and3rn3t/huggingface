@@ -21,7 +21,7 @@ import {
 } from '@phosphor-icons/react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { ReadmeViewer } from './ReadmeViewer';
+import { ReadmeViewer } from '@/components/common';
 
 interface Dataset {
   id: string;
