@@ -38,6 +38,17 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test
+        run: npm run test -- --run --reporter=verbose --coverage.enabled=true
+        timeout-minutes: 5
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
       - name: Build
         run: npm run build
         env:

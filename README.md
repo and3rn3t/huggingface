@@ -6,6 +6,8 @@ A modern, interactive playground for exploring HuggingFace's datasets, models, a
 ![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-44%20passing-brightgreen)
+![Coverage](https://img.shields.io/badge/coverage-73%25-green)
 
 ## ✨ Features
 
@@ -46,6 +48,10 @@ npm run preview
 | `npm run format` | Format code with Prettier |
 | `npm run format:check` | Check code formatting |
 | `npm run type-check` | Run TypeScript type checking |
+| `npm run test` | Run tests with Vitest |
+| `npm run test:ui` | Run tests with UI |
+| `npm run coverage` | Generate test coverage report |
+| `npm run generate-og` | Generate social sharing images |
 | `npm run clean` | Clean dist and cache |
 
 ## 🔑 API Configuration
