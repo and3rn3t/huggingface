@@ -1,25 +1,38 @@
-import { useState } from 'react'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Database, Cpu, Code, Book, Heart, ArrowsLeftRight, Fire, Trophy, List, Command } from '@phosphor-icons/react'
-import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/lib/utils'
+import { TokenSettings } from '@/components/TokenSettings';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
+import {
+  ArrowsLeftRight,
+  Book,
+  Code,
+  Command,
+  Cpu,
+  Database,
+  Fire,
+  Gear,
+  Heart,
+  List,
+  Trophy,
+} from '@phosphor-icons/react';
+import { useState } from 'react';
 
 interface NavigationProps {
-  activeTab: string
-  onTabChange: (tab: string) => void
-  favoritesCount: number
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  favoritesCount: number;
 }
 
 interface NavItem {
-  id: string
-  label: string
-  icon: React.ElementType
-  badge?: number
-  group: 'discover' | 'tools' | 'personal'
+  id: string;
+  label: string;
+  icon: React.ElementType;
+  badge?: number;
+  group: 'discover' | 'tools' | 'personal';
 }
 
 const navItems: NavItem[] = [
@@ -31,49 +44,51 @@ const navItems: NavItem[] = [
   { id: 'learn', label: 'Learn', icon: Book, group: 'tools' },
   { id: 'favorites', label: 'Favorites', icon: Heart, group: 'personal' },
   { id: 'achievements', label: 'Achievements', icon: Trophy, group: 'personal' },
-]
+];
 
 export function Navigation({ activeTab, onTabChange, favoritesCount }: NavigationProps) {
-  const isMobile = useIsMobile()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const isMobile = useIsMobile();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleTabChange = (tab: string) => {
-    onTabChange(tab)
-    setMobileMenuOpen(false)
-  }
+    onTabChange(tab);
+    setMobileMenuOpen(false);
+  };
 
   const getNavItem = (id: string) => {
-    const item = navItems.find(item => item.id === id)
-    if (!item) return null
-    
-    const Icon = item.icon
-    const badge = id === 'favorites' ? favoritesCount : item.badge
-    const isActive = activeTab === id
+    const item = navItems.find((item) => item.id === id);
+    if (!item) return null;
+
+    const Icon = item.icon;
+    const badge = id === 'favorites' ? favoritesCount : item.badge;
+    const isActive = activeTab === id;
 
     return (
       <div key={id} className="relative">
-        <div className={cn(
-          "flex items-center gap-2 px-3 py-2 rounded-md transition-all cursor-pointer group",
-          isActive 
-            ? "bg-accent/20 text-accent font-medium" 
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-        )}>
-          <Icon 
-            size={20} 
-            weight={isActive || (id === 'favorites' && favoritesCount > 0) ? 'fill' : 'regular'} 
+        <div
+          className={cn(
+            'group flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 transition-all',
+            isActive
+              ? 'bg-accent/20 text-accent font-medium'
+              : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+          )}
+        >
+          <Icon
+            size={20}
+            weight={isActive || (id === 'favorites' && favoritesCount > 0) ? 'fill' : 'regular'}
             className={cn(
-              "transition-transform group-hover:scale-110",
-              id === 'trending' && isActive && "text-orange-400",
-              id === 'favorites' && favoritesCount > 0 && !isActive && "text-red-400"
+              'transition-transform group-hover:scale-110',
+              id === 'trending' && isActive && 'text-orange-400',
+              id === 'favorites' && favoritesCount > 0 && !isActive && 'text-red-400'
             )}
           />
           <span>{item.label}</span>
           {badge !== undefined && badge > 0 && (
-            <Badge 
-              variant="secondary" 
+            <Badge
+              variant="secondary"
               className={cn(
-                "ml-auto h-5 min-w-5 px-1.5 flex items-center justify-center text-xs",
-                id === 'favorites' && "bg-red-500/20 text-red-400 border-red-500/50"
+                'ml-auto flex h-5 min-w-5 items-center justify-center px-1.5 text-xs',
+                id === 'favorites' && 'border-red-500/50 bg-red-500/20 text-red-400'
               )}
             >
               {badge}
@@ -81,8 +96,8 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
           )}
         </div>
       </div>
-    )
-  }
+    );
+  };
 
   if (isMobile) {
     return (
@@ -92,7 +107,7 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
             <Button variant="outline" size="icon" className="relative">
               <List size={20} />
               {favoritesCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium border-2 border-background">
+                <span className="border-background absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 bg-red-500 text-xs font-medium text-white">
                   {favoritesCount}
                 </span>
               )}
@@ -102,10 +117,10 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
             <SheetHeader>
               <SheetTitle>Navigation</SheetTitle>
             </SheetHeader>
-            
+
             <div className="mt-6 space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 px-3">Discover</h3>
+                <h3 className="text-muted-foreground mb-3 px-3 text-sm font-medium">Discover</h3>
                 <div className="space-y-1" onClick={() => handleTabChange('trending')}>
                   {getNavItem('trending')}
                 </div>
@@ -120,7 +135,7 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
               <Separator />
 
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 px-3">Tools</h3>
+                <h3 className="text-muted-foreground mb-3 px-3 text-sm font-medium">Tools</h3>
                 <div className="space-y-1" onClick={() => handleTabChange('compare')}>
                   {getNavItem('compare')}
                 </div>
@@ -135,7 +150,7 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
               <Separator />
 
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 px-3">Personal</h3>
+                <h3 className="text-muted-foreground mb-3 px-3 text-sm font-medium">Personal</h3>
                 <div className="space-y-1" onClick={() => handleTabChange('favorites')}>
                   {getNavItem('favorites')}
                 </div>
@@ -147,100 +162,146 @@ export function Navigation({ activeTab, onTabChange, favoritesCount }: Navigatio
           </SheetContent>
         </Sheet>
 
-        <div className="flex-1 overflow-x-auto scrollbar-hide">
+        <div className="scrollbar-hide flex-1 overflow-x-auto">
           <div className="flex items-center gap-2 pb-1">
-            {navItems.filter(item => item.id === activeTab).map(item => {
-              const Icon = item.icon
-              return (
-                <div key={item.id} className="flex items-center gap-2 px-3 py-1.5 bg-accent/20 text-accent rounded-full text-sm font-medium whitespace-nowrap">
-                  <Icon size={16} weight="fill" />
-                  {item.label}
-                </div>
-              )
-            })}
+            {navItems
+              .filter((item) => item.id === activeTab)
+              .map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-accent/20 text-accent flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium whitespace-nowrap"
+                  >
+                    <Icon size={16} weight="fill" />
+                    {item.label}
+                  </div>
+                );
+              })}
           </div>
         </div>
+
+        <TokenSettings
+          trigger={
+            <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="API Settings">
+              <Gear size={18} />
+            </Button>
+          }
+        />
       </div>
-    )
+    );
   }
 
   return (
     <div className="w-full">
       <Tabs value={activeTab} onValueChange={onTabChange}>
-        <div className="flex items-center gap-4 w-full">
-          <TabsList className="inline-flex h-auto p-1 bg-muted/30 backdrop-blur-sm">
+        <div className="flex w-full items-center gap-4">
+          <TabsList className="bg-muted/30 inline-flex h-auto p-1 backdrop-blur-sm">
             <div className="flex items-center gap-1">
-              <TabsTrigger value="trending" className="gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <TabsTrigger
+                value="trending"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent gap-2"
+              >
                 <Fire size={18} weight={activeTab === 'trending' ? 'fill' : 'regular'} />
                 <span className="hidden lg:inline">Trending</span>
               </TabsTrigger>
-              <TabsTrigger value="datasets" className="gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <TabsTrigger
+                value="datasets"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent gap-2"
+              >
                 <Database size={18} />
                 <span className="hidden lg:inline">Datasets</span>
               </TabsTrigger>
-              <TabsTrigger value="models" className="gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <TabsTrigger
+                value="models"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent gap-2"
+              >
                 <Cpu size={18} />
                 <span className="hidden lg:inline">Models</span>
               </TabsTrigger>
             </div>
-            
+
             <Separator orientation="vertical" className="mx-2 h-6" />
-            
+
             <div className="flex items-center gap-1">
-              <TabsTrigger value="compare" className="gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <TabsTrigger
+                value="compare"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent gap-2"
+              >
                 <ArrowsLeftRight size={18} />
                 <span className="hidden lg:inline">Compare</span>
               </TabsTrigger>
-              <TabsTrigger value="playground" className="gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <TabsTrigger
+                value="playground"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent gap-2"
+              >
                 <Code size={18} />
                 <span className="hidden lg:inline">Playground</span>
               </TabsTrigger>
-              <TabsTrigger value="learn" className="gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <TabsTrigger
+                value="learn"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent gap-2"
+              >
                 <Book size={18} />
                 <span className="hidden lg:inline">Learn</span>
               </TabsTrigger>
             </div>
 
             <Separator orientation="vertical" className="mx-2 h-6" />
-            
+
             <div className="flex items-center gap-1">
-              <TabsTrigger value="favorites" className="gap-2 relative data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
-                <Heart 
-                  size={18} 
+              <TabsTrigger
+                value="favorites"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent relative gap-2"
+              >
+                <Heart
+                  size={18}
                   weight={favoritesCount > 0 ? 'fill' : 'regular'}
-                  className={cn(favoritesCount > 0 && activeTab !== 'favorites' && "text-red-400")}
+                  className={cn(favoritesCount > 0 && activeTab !== 'favorites' && 'text-red-400')}
                 />
                 <span className="hidden lg:inline">Favorites</span>
                 {favoritesCount > 0 && (
-                  <Badge 
-                    variant="secondary" 
-                    className="ml-1 h-5 min-w-5 px-1.5 bg-red-500/20 text-red-400 border-red-500/50"
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 h-5 min-w-5 border-red-500/50 bg-red-500/20 px-1.5 text-red-400"
                   >
                     {favoritesCount}
                   </Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="achievements" className="gap-2 data-[state=active]:bg-accent/20 data-[state=active]:text-accent">
+              <TabsTrigger
+                value="achievements"
+                className="data-[state=active]:bg-accent/20 data-[state=active]:text-accent gap-2"
+              >
                 <Trophy size={18} />
                 <span className="hidden lg:inline">Achievements</span>
               </TabsTrigger>
             </div>
           </TabsList>
 
-          <Button
-            variant="outline"
-            size="sm"
-            className="ml-auto gap-2 text-muted-foreground hidden xl:flex"
-            onClick={() => {}}
-          >
-            <Command size={14} />
-            <span className="text-xs">Quick Nav</span>
-            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100">
-              <span className="text-xs">⌘</span>K
-            </kbd>
-          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-muted-foreground hidden gap-2 xl:flex"
+              onClick={() => {}}
+            >
+              <Command size={14} />
+              <span className="text-xs">Quick Nav</span>
+              <kbd className="border-border bg-muted pointer-events-none inline-flex h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none">
+                <span className="text-xs">⌘</span>K
+              </kbd>
+            </Button>
+            <TokenSettings
+              trigger={
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="API Settings">
+                  <Gear size={18} />
+                </Button>
+              }
+            />
+          </div>
         </div>
       </Tabs>
     </div>
-  )
+  );
 }
