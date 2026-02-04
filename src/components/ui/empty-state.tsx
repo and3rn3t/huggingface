@@ -3,7 +3,12 @@ import { motion } from 'framer-motion';
 import { type ComponentType, type SVGProps } from 'react';
 
 // Use React component type for Phosphor icons
-type IconComponent = ComponentType<SVGProps<SVGSVGElement> & { size?: number | string; weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone' }>;
+type IconComponent = ComponentType<
+  SVGProps<SVGSVGElement> & {
+    size?: number | string;
+    weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone';
+  }
+>;
 
 interface EmptyStateProps {
   icon: IconComponent;
@@ -68,7 +73,7 @@ export function EmptyState({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
           onClick={action.onClick}
-          className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring mt-6 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:outline-none"
         >
           {action.label}
         </motion.button>
@@ -106,9 +111,7 @@ export function InlineEmptyState({
         aria-hidden="true"
       />
       <h3 className="mb-2 text-lg font-medium">{title}</h3>
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
-      )}
+      {description && <p className="text-muted-foreground text-sm">{description}</p>}
     </motion.div>
   );
 }
