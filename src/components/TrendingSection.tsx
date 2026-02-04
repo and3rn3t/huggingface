@@ -1,8 +1,9 @@
+import { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { API_ERROR_MESSAGES, useApiError } from '@/hooks/use-api-error';
-import { HFDataset, HFModel, searchDatasets, searchModels } from '@/services/huggingface';
+import { useTrending } from '@/hooks/use-queries';
+import { HFDataset, HFModel } from '@/services/huggingface';
 import {
   ArrowClockwise,
   ArrowUp,
@@ -12,7 +13,6 @@ import {
   Sparkle,
   TrendUp,
 } from '@phosphor-icons/react';
-import { useCallback, useEffect, useState } from 'react';
 
 interface TrendingItem {
   id: string;
@@ -84,62 +84,42 @@ function transformDatasetToTrendingItem(
 }
 
 export function TrendingSection() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [trendingItems, setTrendingItems] = useState<TrendingItem[]>([]);
+  const { data, isLoading, error, refetch } = useTrending();
 
-  // Define useApiError first to avoid dependency issues
-  const { showError } = useApiError({
-    messages: {
-      ...API_ERROR_MESSAGES.MODELS,
-      generic: 'Could not load trending items',
-    },
-  });
+  // Transform the data when available
+  const trendingItems = useMemo(() => {
+    if (!data) return [];
 
-  const fetchTrendingData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [modelsResponse, datasetsResponse] = await Promise.all([
-        searchModels({ sort: 'trending', limit: 6 }),
-        searchDatasets({ sort: 'trending', limit: 6 }),
-      ]);
+    const { models, datasets } = data;
 
-      // Find max downloads for normalization
-      const allDownloads = [
-        ...modelsResponse.map((m) => m.downloads || 0),
-        ...datasetsResponse.map((d) => d.downloads || 0),
-      ];
-      const maxDownloads = Math.max(...allDownloads, 1);
+    // Find max downloads for normalization
+    const allDownloads = [
+      ...models.map((m) => m.downloads || 0),
+      ...datasets.map((d) => d.downloads || 0),
+    ];
+    const maxDownloads = Math.max(...allDownloads, 1);
 
-      // Transform models and datasets
-      const models = modelsResponse.map((model, index) =>
-        transformModelToTrendingItem(model, index, maxDownloads)
-      );
-      const datasets = datasetsResponse.map((dataset, index) =>
-        transformDatasetToTrendingItem(dataset, index, maxDownloads)
-      );
+    // Transform models and datasets
+    const transformedModels = models.map((model, index) =>
+      transformModelToTrendingItem(model, index, maxDownloads)
+    );
+    const transformedDatasets = datasets.map((dataset, index) =>
+      transformDatasetToTrendingItem(dataset, index, maxDownloads)
+    );
 
-      // Combine and sort by downloads
-      const combined = [...models, ...datasets].sort((a, b) => b.downloads - a.downloads);
+    // Combine and sort by downloads
+    const combined = [...transformedModels, ...transformedDatasets].sort(
+      (a, b) => b.downloads - a.downloads
+    );
 
-      // Recalculate trend scores after sorting
-      const topDownloads = combined[0]?.downloads || 1;
-      const recalculated = combined.slice(0, 6).map((item, index) => ({
-        ...item,
-        trendScore: Math.round((item.downloads / topDownloads) * 100),
-        changePercent: Math.max(10, 100 - index * 15),
-      }));
-
-      setTrendingItems(recalculated);
-    } catch (error) {
-      showError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [showError]);
-
-  useEffect(() => {
-    fetchTrendingData();
-  }, [fetchTrendingData]);
+    // Recalculate trend scores after sorting
+    const topDownloads = combined[0]?.downloads || 1;
+    return combined.slice(0, 6).map((item, index) => ({
+      ...item,
+      trendScore: Math.round((item.downloads / topDownloads) * 100),
+      changePercent: Math.max(10, 100 - index * 15),
+    }));
+  }, [data]);
 
   return (
     <div className="space-y-6">
@@ -154,7 +134,7 @@ export function TrendingSection() {
           </p>
         </div>
         <button
-          onClick={fetchTrendingData}
+          onClick={() => refetch()}
           disabled={isLoading}
           className="hover:bg-muted rounded-md p-2 transition-colors disabled:opacity-50"
           title="Refresh trending items"
@@ -165,6 +145,12 @@ export function TrendingSection() {
           />
         </button>
       </div>
+
+      {error && (
+        <Card className="p-4 border-destructive/50 bg-destructive/10">
+          <p className="text-destructive text-sm">Failed to load trending items. Please try again.</p>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="from-accent/20 to-primary/20 border-accent/50 bg-gradient-to-br p-4">
