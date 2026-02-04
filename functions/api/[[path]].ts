@@ -13,6 +13,16 @@ interface Env {
 const HF_API_BASE = 'https://huggingface.co/api';
 const HF_CHAT_COMPLETIONS = 'https://router.huggingface.co/v1/chat/completions';
 
+// Map old model IDs to new ones available in Inference Providers
+const MODEL_MAPPING: Record<string, string> = {
+  'gpt2': 'meta-llama/Llama-3.2-1B-Instruct',
+  'gpt2-medium': 'meta-llama/Llama-3.2-3B-Instruct',
+  'gpt2-large': 'meta-llama/Llama-3.3-70B-Instruct',
+  'distilgpt2': 'meta-llama/Llama-3.2-1B-Instruct',
+  'facebook/bart-large-cnn': 'meta-llama/Llama-3.3-70B-Instruct',
+  // Add more mappings as needed
+};
+
 export async function onRequest(context: {
   request: Request;
   env: Env;
@@ -41,12 +51,15 @@ export async function onRequest(context: {
       const modelId = pathSegments.slice(1).join('/');
       const oldBody = (await request.json()) as any;
 
+      // Map old model ID to new one if needed
+      const newModelId = MODEL_MAPPING[modelId] || modelId;
+
       // Convert old format to chat completions format
       const prompt =
         typeof oldBody.inputs === 'string' ? oldBody.inputs : JSON.stringify(oldBody.inputs);
 
       const newBody = {
-        model: modelId,
+        model: newModelId,
         messages: [
           {
             role: 'user',
