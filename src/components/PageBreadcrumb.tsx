@@ -40,10 +40,30 @@ const tabGroups: Record<string, string> = {
   achievements: 'Personal',
 }
 
+const groupDefaultTabs: Record<string, string> = {
+  'Discover': 'trending',
+  'Tools': 'playground',
+  'Personal': 'favorites',
+}
+
+const groupDescriptions: Record<string, string> = {
+  'Discover': 'Explore trending models and datasets',
+  'Tools': 'Interactive tools and learning resources',
+  'Personal': 'Your saved items and achievements',
+}
+
 export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, previousTab }: PageBreadcrumbProps) {
   const group = tabGroups[activeTab]
   const label = tabLabels[activeTab]
   const previousLabel = previousTab ? tabLabels[previousTab] : null
+  const groupDefaultTab = group ? groupDefaultTabs[group] : null
+  const isOnGroupDefault = groupDefaultTab === activeTab
+
+  const handleGroupClick = () => {
+    if (group && groupDefaultTab && onNavigate && !isOnGroupDefault) {
+      onNavigate(groupDefaultTab)
+    }
+  }
 
   return (
     <div className="flex items-center gap-3">
@@ -69,6 +89,7 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
             <BreadcrumbLink 
               className="flex items-center gap-1 cursor-pointer hover:text-accent transition-colors" 
               onClick={() => onNavigate?.('trending')}
+              title="Go to Home"
             >
               <House size={14} weight="fill" />
               Home
@@ -79,7 +100,16 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
             <>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink className="text-muted-foreground">
+                <BreadcrumbLink 
+                  className={cn(
+                    "transition-colors",
+                    isOnGroupDefault 
+                      ? "text-muted-foreground cursor-default" 
+                      : "cursor-pointer hover:text-accent"
+                  )}
+                  onClick={handleGroupClick}
+                  title={isOnGroupDefault ? groupDescriptions[group] : `Jump to ${group}`}
+                >
                   {group}
                 </BreadcrumbLink>
               </BreadcrumbItem>
