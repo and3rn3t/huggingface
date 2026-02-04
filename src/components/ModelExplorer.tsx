@@ -18,6 +18,7 @@ import { HFModel, searchModels } from '@/services/huggingface';
 import { ArrowClockwise, Copy, Cpu, Heart, MagnifyingGlass, Sparkle } from '@phosphor-icons/react';
 import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { ReadmeViewer } from './ReadmeViewer';
 
 interface Model {
   id: string;
@@ -420,6 +421,13 @@ tokenizer = AutoTokenizer.from_pretrained("${selectedModel.id}")`}
                   <span className="font-medium">❤️ {selectedModel.likes}</span>
                 </div>
               </div>
+
+              <ReadmeViewer
+                resourceId={selectedModel.id}
+                type="model"
+                maxHeight="300px"
+                className="mt-4"
+              />
             </div>
           )}
         </DialogContent>
