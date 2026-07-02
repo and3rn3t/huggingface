@@ -1,5 +1,7 @@
 name: Deploy to Cloudflare Pages
 
+# Quality gates (lint/type-check/test) run in ci.yml — this workflow only builds and deploys.
+
 on:
   push:
     branches: [main]
@@ -18,42 +20,20 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
-          cache: 'npm'
-
+          node-version-file: .nvmrc
+          cache: npm
       - name: Install dependencies
         run: npm ci
-
-      - name: Type check
-        run: npm run type-check
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Test
-        run: npm run test -- --run --reporter=verbose --coverage.enabled=true
-        timeout-minutes: 5
-
-      - name: Upload coverage reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
-
+        env:
+          HUSKY: 0
       - name: Build
         run: npm run build
         env:
           VITE_HF_TOKEN: ${{ secrets.VITE_HF_TOKEN }}
-
       - name: Deploy to Cloudflare Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: cloudflare/wrangler-action@v3
@@ -61,7 +41,6 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: pages deploy dist --project-name=hug --commit-dirty=true
-
       - name: Deploy Preview
         # Skip for automated dependency PRs (Dependabot/Renovate) — secrets not
         # available to bot-authored PRs, so the Cloudflare deploy would always fail.

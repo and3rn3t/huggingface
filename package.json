@@ -2,6 +2,9 @@
   "name": "huggingface-playground",
   "description": "An interactive learning platform for exploring HuggingFace's ecosystem — browse datasets, discover models, and experiment with AI APIs",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=24"
+  },
   "private": true,
   "type": "module",
   "author": {
@@ -25,6 +28,7 @@
     "typescript"
   ],
   "scripts": {
+    "prepare": "husky",
     "dev": "vite",
     "kill": "fuser -k 5000/tcp",
     "build": "tsc -b --noCheck && vite build",
@@ -97,6 +101,8 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.0.0",
+    "@commitlint/config-conventional": "^21.0.0",
     "@eslint/js": "^9.21.0",
     "@playwright/test": "^1.48.0",
     "@tailwindcss/postcss": "^4.1.8",
