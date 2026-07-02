@@ -63,7 +63,12 @@ jobs:
           command: pages deploy dist --project-name=hug --commit-dirty=true
 
       - name: Deploy Preview
-        if: github.event_name == 'pull_request'
+        # Skip for automated dependency PRs (Dependabot/Renovate) — secrets not
+        # available to bot-authored PRs, so the Cloudflare deploy would always fail.
+        if: |
+          github.event_name == 'pull_request' &&
+          github.actor != 'dependabot[bot]' &&
+          github.actor != 'renovate[bot]'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
