@@ -12,44 +12,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  deployments: write
-
 jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - name: Install dependencies
-        run: npm ci
-        env:
-          HUSKY: 0
-      - name: Build
-        run: npm run build
-        env:
-          VITE_HF_TOKEN: ${{ secrets.VITE_HF_TOKEN }}
-      - name: Deploy to Cloudflare Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=hug --commit-dirty=true
-      - name: Deploy Preview
-        # Skip for automated dependency PRs (Dependabot/Renovate) — secrets not
-        # available to bot-authored PRs, so the Cloudflare deploy would always fail.
-        if: |
-          github.event_name == 'pull_request' &&
-          github.actor != 'dependabot[bot]' &&
-          github.actor != 'renovate[bot]'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=hug --branch=${{ github.head_ref }} --commit-dirty=true
+  deploy:
+    uses: and3rn3t/.github/.github/workflows/reusable-cloudflare-pages-deploy.yml@main
+    with:
+      project-name: hug
+      build-secret-env-name: VITE_HF_TOKEN
+    secrets:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      BUILD_SECRET: ${{ secrets.VITE_HF_TOKEN }}

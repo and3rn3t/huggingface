@@ -9,8 +9,14 @@ permissions:
   contents: read
 
 jobs:
+  # continue-on-error isn't a valid key on a job that calls a reusable workflow
+  # via `uses:` (GitHub Actions restriction) — removed rather than worked
+  # around, since this job has no downstream consumers to protect from
+  # failure. A failed nightly run now correctly shows red instead of silently
+  # succeeding; if you want a non-blocking nightly signal with a separate
+  # notification, add a second job with `if: always()` that reports on
+  # `needs.test-e2e.result` instead.
   test-e2e:
-    continue-on-error: true # nightly signal, not a gate
     uses: and3rn3t/.github/.github/workflows/reusable-playwright-e2e.yml@main
     with:
       command: npm run test:e2e
