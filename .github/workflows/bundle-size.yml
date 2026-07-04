@@ -1,0 +1,17 @@
+# Bundle size report — comments on PRs with the compressed-size diff for the
+# Vite build. Report-only (no failing budget yet); see reusable-bundle-size.yml.
+# Adjust `pattern` if this repo's build output isn't a plain dist/**.
+name: Bundle Size
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  bundle-size:
+    uses: and3rn3t/.github/.github/workflows/reusable-bundle-size.yml@main
+    with:
+      build-script: build
+      pattern: "dist/**/*.{js,css}"
+      package-manager: npm
