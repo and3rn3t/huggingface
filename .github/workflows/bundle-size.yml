@@ -6,7 +6,9 @@ name: Bundle Size
 on:
   pull_request:
 
-permissions: {}
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   bundle-size:
