@@ -17,6 +17,6 @@ permissions:
 jobs:
   quality:
     name: Lint, Type-check & Test
-    uses: and3rn3t/.github/.github/workflows/reusable-node-verify.yml@main
+    uses: and3rn3t/.github/.github/workflows/reusable-node-verify.yml@v1
     with:
       command: npm run lint && npm run type-check && npm run format:check && npm run coverage && npm run build

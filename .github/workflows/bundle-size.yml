@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   bundle-size:
-    uses: and3rn3t/.github/.github/workflows/reusable-bundle-size.yml@main
+    uses: and3rn3t/.github/.github/workflows/reusable-bundle-size.yml@v1
     with:
       build-script: build
       pattern: "dist/**/*.{js,css}"
