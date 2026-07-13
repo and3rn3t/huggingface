@@ -17,7 +17,7 @@ jobs:
   # notification, add a second job with `if: always()` that reports on
   # `needs.test-e2e.result` instead.
   test-e2e:
-    uses: and3rn3t/.github/.github/workflows/reusable-playwright-e2e.yml@v1
+    uses: and3rn3t/.github/.github/workflows/reusable-playwright-e2e.yml@bac71674cf57c550774f71a70e32a5bb7bec48ad # v1
     with:
       command: npm run test:e2e
       browsers: chromium firefox webkit
