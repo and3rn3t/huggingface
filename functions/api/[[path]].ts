@@ -134,18 +134,17 @@ export async function onRequest(context: {
         body: JSON.stringify(oldBody),
       });
 
+      // Buffer the body once: reading it for logging would otherwise leave the stream unusable.
+      const responseBody = await response.text();
       if (!response.ok) {
-        const errorBody = await response.text();
         console.error(`Serverless inference error: ${response.status} ${response.statusText}`);
-        console.error(`Error body: ${errorBody.substring(0, 500)}`);
+        console.error(`Error body: ${responseBody.substring(0, 500)}`);
       }
 
-      const responseHeaders = new Headers(response.headers);
-
-      return new Response(response.body, {
+      return new Response(responseBody, {
         status: response.status,
         statusText: response.statusText,
-        headers: responseHeaders,
+        headers: { 'Content-Type': response.headers.get('Content-Type') || 'application/json' },
       });
     }
 
