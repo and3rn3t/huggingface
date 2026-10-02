@@ -11,7 +11,7 @@ interface Env {
 
 const HF_API_BASE = 'https://huggingface.co/api';
 const HF_CHAT_COMPLETIONS = 'https://router.huggingface.co/v1/chat/completions';
-const HF_SERVERLESS_INFERENCE = 'https://api-inference.huggingface.co/models';
+const HF_SERVERLESS_INFERENCE = 'https://router.huggingface.co/hf-inference/models';
 
 // Models that should use chat completions API (text generation models)
 const CHAT_MODELS = new Set(['gpt2', 'gpt2-medium', 'gpt2-large', 'gpt2-xl', 'distilgpt2']);
