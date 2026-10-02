@@ -1,14 +1,15 @@
 /**
  * Cloudflare Pages Function - HuggingFace API Proxy
  *
- * Proxies POST /api/inference/* to HuggingFace inference (chat completions for text-gen models).
- * No other HF endpoints are exposed, and no CORS headers are sent (same-origin only).
+ * Proxies POST /api/inference/* to HuggingFace inference (chat completions for text-gen models)
+ * and GET /api/{models,datasets}/* for public browsing. No other HF endpoints are exposed, and no CORS headers are sent (same-origin only).
  */
 
 interface Env {
   VITE_HF_TOKEN?: string;
 }
 
+const HF_API_BASE = 'https://huggingface.co/api';
 const HF_CHAT_COMPLETIONS = 'https://router.huggingface.co/v1/chat/completions';
 const HF_SERVERLESS_INFERENCE = 'https://api-inference.huggingface.co/models';
 
@@ -33,6 +34,7 @@ export async function onRequest(context: {
   params: { path: string[] };
 }) {
   const { request, env, params } = context;
+  const url = new URL(request.url);
 
   // Same-origin only: no CORS headers, so other sites can't use the server token from a browser.
   if (request.method === 'OPTIONS') {
@@ -147,8 +149,25 @@ export async function onRequest(context: {
       });
     }
 
-    // Anything else (e.g. whoami-v2) is intentionally not proxied: the proxy
-    // carries a server-side token, so it only exposes inference.
+    // Public read-only browsing (models/datasets). Only forwards the caller's own
+    // Authorization header; the server token is never attached, so private repos
+    // and account endpoints (e.g. whoami-v2) aren't reachable through it.
+    if (request.method === 'GET' && ['models', 'datasets'].includes(pathSegments[0])) {
+      const headers = new Headers({ 'User-Agent': 'Cloudflare-Pages-Proxy/1.0' });
+      const authHeader = request.headers.get('Authorization');
+      if (authHeader) headers.set('Authorization', authHeader);
+
+      const response = await fetch(
+        `${HF_API_BASE}/${pathSegments.map(encodeURIComponent).join('/')}${url.search}`,
+        { headers }
+      );
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      });
+    }
+
     return json({ error: 'Not found' }, 404);
   } catch (error) {
     console.error('Proxy error:', error);
