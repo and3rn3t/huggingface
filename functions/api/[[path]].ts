@@ -1,16 +1,14 @@
 /**
  * Cloudflare Pages Function - HuggingFace API Proxy
  *
- * Proxies requests to HuggingFace API to avoid CORS issues.
- * All requests to /api/* are forwarded to huggingface.co/api/*
- * All requests to /api/inference/* are converted to the new chat completions API
+ * Proxies POST /api/inference/* to HuggingFace inference (chat completions for text-gen models).
+ * No other HF endpoints are exposed, and no CORS headers are sent (same-origin only).
  */
 
 interface Env {
   VITE_HF_TOKEN?: string;
 }
 
-const HF_API_BASE = 'https://huggingface.co/api';
 const HF_CHAT_COMPLETIONS = 'https://router.huggingface.co/v1/chat/completions';
 const HF_SERVERLESS_INFERENCE = 'https://api-inference.huggingface.co/models';
 
@@ -26,24 +24,19 @@ const CHAT_MODEL_MAPPING: Record<string, string> = {
   distilgpt2: 'meta-llama/Llama-3.2-1B-Instruct',
 };
 
+const json = (body: unknown, status: number) =>
+  new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+
 export async function onRequest(context: {
   request: Request;
   env: Env;
   params: { path: string[] };
 }) {
   const { request, env, params } = context;
-  const url = new URL(request.url);
 
-  // Handle CORS preflight
+  // Same-origin only: no CORS headers, so other sites can't use the server token from a browser.
   if (request.method === 'OPTIONS') {
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '86400',
-      },
-    });
+    return new Response(null, { status: 204 });
   }
 
   try {
@@ -63,7 +56,6 @@ export async function onRequest(context: {
           status: 401,
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
           },
         });
       }
@@ -107,7 +99,6 @@ export async function onRequest(context: {
             status: response.status,
             headers: {
               'Content-Type': 'application/json',
-              'Access-Control-Allow-Origin': '*',
             },
           });
         }
@@ -125,7 +116,6 @@ export async function onRequest(context: {
           status: 200,
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
           },
         });
       }
@@ -149,9 +139,6 @@ export async function onRequest(context: {
       }
 
       const responseHeaders = new Headers(response.headers);
-      responseHeaders.set('Access-Control-Allow-Origin', '*');
-      responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-      responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
       return new Response(response.body, {
         status: response.status,
@@ -160,43 +147,9 @@ export async function onRequest(context: {
       });
     }
 
-    // Regular API requests (non-inference)
-    const apiPath = pathSegments.join('/');
-    const targetUrl = `${HF_API_BASE}/${apiPath}${url.search}`;
-
-    const headers = new Headers();
-    headers.set('Content-Type', request.headers.get('Content-Type') || 'application/json');
-
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader) {
-      headers.set('Authorization', authHeader);
-    } else if (env.VITE_HF_TOKEN) {
-      headers.set('Authorization', `Bearer ${env.VITE_HF_TOKEN}`);
-    }
-
-    headers.set('User-Agent', 'Cloudflare-Pages-Proxy/1.0');
-
-    const proxyRequest = new Request(targetUrl, {
-      method: request.method,
-      headers,
-      body:
-        request.method !== 'GET' && request.method !== 'HEAD'
-          ? await request.arrayBuffer()
-          : undefined,
-    });
-
-    const response = await fetch(proxyRequest);
-
-    const responseHeaders = new Headers(response.headers);
-    responseHeaders.set('Access-Control-Allow-Origin', '*');
-    responseHeaders.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    responseHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    return new Response(response.body, {
-      status: response.status,
-      statusText: response.statusText,
-      headers: responseHeaders,
-    });
+    // Anything else (e.g. whoami-v2) is intentionally not proxied: the proxy
+    // carries a server-side token, so it only exposes inference.
+    return json({ error: 'Not found' }, 404);
   } catch (error) {
     console.error('Proxy error:', error);
     return new Response(
@@ -208,7 +161,6 @@ export async function onRequest(context: {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
         },
       }
     );

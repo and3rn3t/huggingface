@@ -133,10 +133,13 @@ export function getToken(): string | null {
     return storedToken;
   }
 
-  // Fall back to environment variable
-  const envToken = import.meta.env.VITE_HF_TOKEN;
-  if (envToken) {
-    return envToken;
+  // Dev-only fallback. Guarded by DEV so Vite strips it (and any inlined token)
+  // from production bundles; prod uses the server-side proxy secret instead.
+  if (import.meta.env.DEV) {
+    const envToken = import.meta.env.VITE_HF_TOKEN;
+    if (envToken) {
+      return envToken;
+    }
   }
 
   return null;

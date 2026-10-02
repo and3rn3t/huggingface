@@ -79,7 +79,7 @@ npm run dev
 Runs on `http://localhost:5173`
 
 > **Note:** API requests will fail locally because the Cloudflare Functions proxy isn't available. You'll need to either:
-> 1. Set `VITE_HF_TOKEN` in `.env.local` (token will be used client-side)
+> 1. Set `VITE_HF_TOKEN` in `.env.local` (dev builds only; never bundled into production)
 > 2. Use `wrangler pages dev` (see below)
 
 ### Development with Cloudflare Functions (Recommended)
