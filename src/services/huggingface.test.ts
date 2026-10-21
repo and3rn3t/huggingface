@@ -67,10 +67,7 @@ describe('Search Models', () => {
 
     const results = await searchModels({ search: 'gpt2', limit: 10 });
     expect(results).toEqual(mockModels);
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/models'),
-      expect.any(Object)
-    );
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining('/api/models'), expect.any(Object));
   });
 
   it('should search models with filters', async () => {
@@ -91,10 +88,7 @@ describe('Search Models', () => {
       offset: 10,
     });
 
-    expect(fetch).toHaveBeenCalledWith(
-      expect.stringContaining('search=gpt'),
-      expect.any(Object)
-    );
+    expect(fetch).toHaveBeenCalledWith(expect.stringContaining('search=gpt'), expect.any(Object));
     expect(fetch).toHaveBeenCalledWith(
       expect.stringContaining('author=openai'),
       expect.any(Object)
@@ -153,9 +147,7 @@ describe('Search Datasets', () => {
   });
 
   it('should handle network errors', async () => {
-    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-      new Error('Network error')
-    );
+    (global.fetch as ReturnType<typeof vi.fn>).mockRejectedValueOnce(new Error('Network error'));
 
     await expect(searchDatasets({ search: 'test' })).rejects.toThrow();
   });
@@ -204,17 +196,13 @@ describe('Run Inference', () => {
       statusText: 'Unauthorized',
     });
 
-    await expect(
-      runInference('gpt2', { inputs: 'test' })
-    ).rejects.toThrow();
+    await expect(runInference('gpt2', { inputs: 'test' })).rejects.toThrow();
   });
 
   it('should require token for inference', async () => {
     localStorage.clear();
 
-    await expect(
-      runInference('gpt2', { inputs: 'test' })
-    ).rejects.toThrow('API token required');
+    await expect(runInference('gpt2', { inputs: 'test' })).rejects.toThrow('API token required');
   });
 
   it('should handle model loading time', async () => {
@@ -225,9 +213,7 @@ describe('Run Inference', () => {
       json: async () => ({ estimated_time: 20 }),
     });
 
-    await expect(
-      runInference('large-model', { inputs: 'test' })
-    ).rejects.toThrow();
+    await expect(runInference('large-model', { inputs: 'test' })).rejects.toThrow();
   });
 });
 

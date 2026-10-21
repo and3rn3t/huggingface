@@ -20,7 +20,7 @@ export function SavedPrompts({ prompts, onLoad, onDelete }: SavedPromptsProps) {
 
   return (
     <Card className="p-4">
-      <h4 className="font-semibold mb-3 flex items-center gap-2">
+      <h4 className="mb-3 flex items-center gap-2 font-semibold">
         <Star size={18} weight="fill" className="text-accent" />
         Saved Prompts
       </h4>
@@ -28,12 +28,9 @@ export function SavedPrompts({ prompts, onLoad, onDelete }: SavedPromptsProps) {
         {prompts.slice(0, 5).map((saved) => (
           <div
             key={saved.id}
-            className="flex items-center justify-between p-2 bg-muted rounded-lg hover:bg-muted/70 transition-colors"
+            className="bg-muted hover:bg-muted/70 flex items-center justify-between rounded-lg p-2 transition-colors"
           >
-            <button
-              onClick={() => onLoad(saved.id)}
-              className="flex-1 text-left text-sm truncate"
-            >
+            <button onClick={() => onLoad(saved.id)} className="flex-1 truncate text-left text-sm">
               {saved.name}
             </button>
             <Button size="sm" variant="ghost" onClick={() => onDelete(saved.id)}>

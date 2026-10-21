@@ -23,7 +23,7 @@ export function ExecutionHistory({ history, onSelect }: ExecutionHistoryProps) {
 
   return (
     <Card className="p-4">
-      <h4 className="font-semibold mb-3 flex items-center gap-2">
+      <h4 className="mb-3 flex items-center gap-2 font-semibold">
         <Clock size={18} />
         Recent Executions
       </h4>
@@ -31,7 +31,7 @@ export function ExecutionHistory({ history, onSelect }: ExecutionHistoryProps) {
         {history.slice(0, 5).map((item) => (
           <div
             key={item.id}
-            className="p-3 bg-muted rounded-lg space-y-1 hover:bg-muted/70 transition-colors cursor-pointer"
+            className="bg-muted hover:bg-muted/70 cursor-pointer space-y-1 rounded-lg p-3 transition-colors"
             onClick={() => onSelect(item)}
           >
             <div className="flex items-center justify-between">
@@ -40,8 +40,8 @@ export function ExecutionHistory({ history, onSelect }: ExecutionHistoryProps) {
                 {item.executionTime}ms
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground truncate">{item.input}</p>
-            <div className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground truncate text-xs">{item.input}</p>
+            <div className="text-muted-foreground text-xs">
               {new Date(item.timestamp).toLocaleString()}
             </div>
           </div>

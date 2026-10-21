@@ -181,7 +181,7 @@ describe('useFavorites', () => {
         result.current.updateNote('model-123', 'model', '  spaced note  ');
       });
 
-      const favorite = result.current.favorites.find(f => f.id === 'model-123');
+      const favorite = result.current.favorites.find((f) => f.id === 'model-123');
       expect(favorite?.note).toBe('spaced note');
     });
 
@@ -200,7 +200,7 @@ describe('useFavorites', () => {
         result.current.updateNote('model-123', 'model', '   ');
       });
 
-      const favorite = result.current.favorites.find(f => f.id === 'model-123');
+      const favorite = result.current.favorites.find((f) => f.id === 'model-123');
       expect(favorite?.note).toBeUndefined();
     });
 

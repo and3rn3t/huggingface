@@ -41,9 +41,7 @@ describe('useLocalStorage', () => {
   });
 
   it('should handle complex objects', () => {
-    const { result } = renderHook(() =>
-      useLocalStorage('user', { name: 'John', age: 30 })
-    );
+    const { result } = renderHook(() => useLocalStorage('user', { name: 'John', age: 30 }));
 
     act(() => {
       result.current[1]({ name: 'Jane', age: 25 });

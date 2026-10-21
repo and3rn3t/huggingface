@@ -12,15 +12,11 @@ interface CodeExamplesProps {
   maxTokens: number;
 }
 
-export function CodeExamples({
-  selectedModel,
-  input,
-  temperature,
-  maxTokens,
-}: CodeExamplesProps) {
-  const copyCode = useCallback((lang: 'python' | 'javascript' | 'curl') => {
-    const codes = {
-      python: `# Python Example
+export function CodeExamples({ selectedModel, input, temperature, maxTokens }: CodeExamplesProps) {
+  const copyCode = useCallback(
+    (lang: 'python' | 'javascript' | 'curl') => {
+      const codes = {
+        python: `# Python Example
 import requests
 
 API_URL = "https://api-inference.huggingface.co/models/${selectedModel}"
@@ -37,7 +33,7 @@ output = query({
     "max_tokens": ${maxTokens}
   }
 })`,
-      javascript: `// JavaScript Example
+        javascript: `// JavaScript Example
 const API_URL = "https://api-inference.huggingface.co/models/${selectedModel}";
 
 async function query(data) {
@@ -60,7 +56,7 @@ const result = await query({
     max_tokens: ${maxTokens}
   }
 });`,
-      curl: `# cURL Example
+        curl: `# cURL Example
 curl https://api-inference.huggingface.co/models/${selectedModel} \\
   -X POST \\
   -H "Authorization: Bearer TOKEN" \\
@@ -72,17 +68,19 @@ curl https://api-inference.huggingface.co/models/${selectedModel} \\
       "max_tokens": ${maxTokens}
     }
   }'`,
-    };
+      };
 
-    navigator.clipboard.writeText(codes[lang]);
-    toast.success(`${lang.toUpperCase()} code copied!`);
-  }, [selectedModel, input, temperature, maxTokens]);
+      navigator.clipboard.writeText(codes[lang]);
+      toast.success(`${lang.toUpperCase()} code copied!`);
+    },
+    [selectedModel, input, temperature, maxTokens]
+  );
 
   return (
     <Card className="p-4">
-      <h4 className="font-semibold mb-3 text-sm">Code Examples</h4>
+      <h4 className="mb-3 text-sm font-semibold">Code Examples</h4>
       <Tabs defaultValue="python">
-        <TabsList className="grid grid-cols-3 mb-3">
+        <TabsList className="mb-3 grid grid-cols-3">
           <TabsTrigger value="python" className="text-xs">
             Python
           </TabsTrigger>
@@ -100,8 +98,8 @@ curl https://api-inference.huggingface.co/models/${selectedModel} \\
               <Copy size={14} />
             </Button>
           </div>
-          <Card className="p-3 bg-muted">
-            <pre className="text-xs text-accent overflow-x-auto max-h-[400px] overflow-y-auto">
+          <Card className="bg-muted p-3">
+            <pre className="text-accent max-h-[400px] overflow-x-auto overflow-y-auto text-xs">
               {`# Python Example
 import requests
 
@@ -131,8 +129,8 @@ output = query({
               <Copy size={14} />
             </Button>
           </div>
-          <Card className="p-3 bg-muted">
-            <pre className="text-xs text-accent overflow-x-auto max-h-[400px] overflow-y-auto">
+          <Card className="bg-muted p-3">
+            <pre className="text-accent max-h-[400px] overflow-x-auto overflow-y-auto text-xs">
               {`// JavaScript Example
 const API_URL = "https://api-inference...";
 
@@ -166,8 +164,8 @@ const result = await query({
               <Copy size={14} />
             </Button>
           </div>
-          <Card className="p-3 bg-muted">
-            <pre className="text-xs text-accent overflow-x-auto max-h-[400px] overflow-y-auto">
+          <Card className="bg-muted p-3">
+            <pre className="text-accent max-h-[400px] overflow-x-auto overflow-y-auto text-xs">
               {`# cURL Example
 curl https://api-inference... \\
   -X POST \\

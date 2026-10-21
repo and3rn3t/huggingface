@@ -1,12 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatNumber } from '@/lib/utils';
 import { useSearchModels } from '@/hooks/use-queries';
@@ -148,10 +143,7 @@ export function FeaturedModal({ open, onOpenChange, onSelectModel }: FeaturedMod
   useEffect(() => {
     if (fetchedModels && fetchedModels.length > 0) {
       localStorage.setItem(CACHE_KEY, JSON.stringify(fetchedModels));
-      localStorage.setItem(
-        CACHE_EXPIRY_KEY,
-        (Date.now() + CACHE_DURATION).toString()
-      );
+      localStorage.setItem(CACHE_EXPIRY_KEY, (Date.now() + CACHE_DURATION).toString());
       setCachedModels(fetchedModels);
     }
   }, [fetchedModels]);
@@ -175,11 +167,11 @@ export function FeaturedModal({ open, onOpenChange, onSelectModel }: FeaturedMod
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Sparkle className="h-6 w-6 text-primary" weight="fill" />
+              <Sparkle className="text-primary h-6 w-6" weight="fill" />
               <DialogTitle>Featured Models</DialogTitle>
             </div>
             <Button
@@ -206,17 +198,17 @@ export function FeaturedModal({ open, onOpenChange, onSelectModel }: FeaturedMod
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
           {isLoading && !cachedModels
             ? // Loading skeletons
               Array.from({ length: 8 }).map((_, i) => (
                 <Card key={i} className="p-4">
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="mb-3 flex items-start justify-between">
                     <Skeleton className="h-5 w-32" />
                     <Skeleton className="h-5 w-16 rounded-full" />
                   </div>
-                  <Skeleton className="h-4 w-full mb-2" />
-                  <div className="flex gap-2 mt-3">
+                  <Skeleton className="mb-2 h-4 w-full" />
+                  <div className="mt-3 flex gap-2">
                     <Skeleton className="h-5 w-20 rounded-full" />
                     <Skeleton className="h-5 w-16 rounded-full" />
                   </div>
@@ -231,7 +223,7 @@ export function FeaturedModal({ open, onOpenChange, onSelectModel }: FeaturedMod
                 return (
                   <Card
                     key={modelId}
-                    className="p-4 cursor-pointer hover:border-primary transition-colors"
+                    className="hover:border-primary cursor-pointer p-4 transition-colors"
                     role="button"
                     tabIndex={0}
                     onClick={() => handleSelectModel(model)}
@@ -242,25 +234,24 @@ export function FeaturedModal({ open, onOpenChange, onSelectModel }: FeaturedMod
                       }
                     }}
                   >
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="mb-2 flex items-start justify-between">
                       <div>
-                        <h3 className="font-semibold text-sm">{displayName}</h3>
-                        <p className="text-xs text-muted-foreground">
+                        <h3 className="text-sm font-semibold">{displayName}</h3>
+                        <p className="text-muted-foreground text-xs">
                           by {model.author || nameParts[0] || 'Unknown'}
                         </p>
                       </div>
                       <Badge variant="secondary" className="gap-1">
-                        <TrendUp className="h-3 w-3" />
-                        #{displayModels.indexOf(model) + 1}
+                        <TrendUp className="h-3 w-3" />#{displayModels.indexOf(model) + 1}
                       </Badge>
                     </div>
 
-                    <div className="flex gap-3 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground flex gap-3 text-xs">
                       <span>↓ {formatNumber(model.downloads || 0)}</span>
                       <span>♥ {formatNumber(model.likes || 0)}</span>
                     </div>
 
-                    <div className="flex gap-2 mt-3">
+                    <div className="mt-3 flex gap-2">
                       <Badge variant="outline" className="text-xs">
                         {model.pipeline_tag || 'Unknown'}
                       </Badge>

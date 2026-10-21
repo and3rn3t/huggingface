@@ -61,14 +61,12 @@ describe('TrendingSection', () => {
     render(<TrendingSection />, { wrapper: createWrapper() });
 
     expect(screen.getByText('Trending Now')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Most popular models and datasets/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Most popular models and datasets/i)).toBeInTheDocument();
   });
 
   it('should render loading state or content', () => {
     const { container } = render(<TrendingSection />, { wrapper: createWrapper() });
-    
+
     // Just verify it renders without crashing
     expect(container).toBeTruthy();
   });

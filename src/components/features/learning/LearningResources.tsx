@@ -368,7 +368,7 @@ export function LearningResources() {
         </div>
 
         {completedLessons.length > 0 && (
-        <Card className="from-accent/20 to-primary/20 border-accent/50 bg-linear-to-br p-4">
+          <Card className="from-accent/20 to-primary/20 border-accent/50 bg-linear-to-br p-4">
             <div className="flex items-center gap-3">
               <Trophy className="text-accent" size={32} weight="fill" />
               <div>
@@ -681,7 +681,7 @@ export function LearningResources() {
               className="hover:shadow-primary/20 border-border hover:border-accent/50 p-4 transition-all hover:-translate-y-1 hover:shadow-lg"
             >
               <div className="mb-3 flex items-start gap-3">
-              <Icon className="text-accent shrink-0" size={24} />
+                <Icon className="text-accent shrink-0" size={24} />
                 <div className="flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <h3 className="font-medium">{resource.title}</h3>

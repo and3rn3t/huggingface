@@ -5,17 +5,17 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
-import { House, ArrowLeft } from '@phosphor-icons/react'
-import { cn } from '@/lib/utils'
+} from '@/components/ui/breadcrumb';
+import { Button } from '@/components/ui/button';
+import { House, ArrowLeft } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 interface PageBreadcrumbProps {
-  activeTab: string
-  onNavigate?: (tab: string) => void
-  onGoBack?: () => void
-  canGoBack?: boolean
-  previousTab?: string | null
+  activeTab: string;
+  onNavigate?: (tab: string) => void;
+  onGoBack?: () => void;
+  canGoBack?: boolean;
+  previousTab?: string | null;
 }
 
 const tabLabels: Record<string, string> = {
@@ -27,7 +27,7 @@ const tabLabels: Record<string, string> = {
   learn: 'Learning Resources',
   favorites: 'Favorites',
   achievements: 'Achievements',
-}
+};
 
 const tabGroups: Record<string, string> = {
   trending: 'Discover',
@@ -38,32 +38,38 @@ const tabGroups: Record<string, string> = {
   learn: 'Tools',
   favorites: 'Personal',
   achievements: 'Personal',
-}
+};
 
 const groupDefaultTabs: Record<string, string> = {
-  'Discover': 'trending',
-  'Tools': 'playground',
-  'Personal': 'favorites',
-}
+  Discover: 'trending',
+  Tools: 'playground',
+  Personal: 'favorites',
+};
 
 const groupDescriptions: Record<string, string> = {
-  'Discover': 'Explore trending models and datasets',
-  'Tools': 'Interactive tools and learning resources',
-  'Personal': 'Your saved items and achievements',
-}
+  Discover: 'Explore trending models and datasets',
+  Tools: 'Interactive tools and learning resources',
+  Personal: 'Your saved items and achievements',
+};
 
-export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, previousTab }: PageBreadcrumbProps) {
-  const group = tabGroups[activeTab]
-  const label = tabLabels[activeTab]
-  const previousLabel = previousTab ? tabLabels[previousTab] : null
-  const groupDefaultTab = group ? groupDefaultTabs[group] : null
-  const isOnGroupDefault = groupDefaultTab === activeTab
+export function PageBreadcrumb({
+  activeTab,
+  onNavigate,
+  onGoBack,
+  canGoBack,
+  previousTab,
+}: PageBreadcrumbProps) {
+  const group = tabGroups[activeTab];
+  const label = tabLabels[activeTab];
+  const previousLabel = previousTab ? tabLabels[previousTab] : null;
+  const groupDefaultTab = group ? groupDefaultTabs[group] : null;
+  const isOnGroupDefault = groupDefaultTab === activeTab;
 
   const handleGroupClick = () => {
     if (group && groupDefaultTab && onNavigate && !isOnGroupDefault) {
-      onNavigate(groupDefaultTab)
+      onNavigate(groupDefaultTab);
     }
-  }
+  };
 
   return (
     <div className="flex items-center gap-3">
@@ -73,8 +79,8 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
           size="sm"
           onClick={onGoBack}
           className={cn(
-            "gap-2 text-muted-foreground hover:text-foreground transition-all",
-            "hover:bg-accent/10 hover:scale-105"
+            'text-muted-foreground hover:text-foreground gap-2 transition-all',
+            'hover:bg-accent/10 hover:scale-105'
           )}
           title={previousLabel ? `Back to ${previousLabel}` : 'Go back'}
         >
@@ -82,12 +88,12 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
           <span className="hidden sm:inline">Back</span>
         </Button>
       )}
-      
+
       <Breadcrumb aria-label="Page navigation breadcrumb">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink 
-              className="flex items-center gap-1 cursor-pointer hover:text-accent transition-colors" 
+            <BreadcrumbLink
+              className="hover:text-accent flex cursor-pointer items-center gap-1 transition-colors"
               onClick={() => onNavigate?.('trending')}
               title="Go to Home"
             >
@@ -95,17 +101,17 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
               Home
             </BreadcrumbLink>
           </BreadcrumbItem>
-          
+
           {group && (
             <>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink 
+                <BreadcrumbLink
                   className={cn(
-                    "transition-colors",
-                    isOnGroupDefault 
-                      ? "text-muted-foreground cursor-default" 
-                      : "cursor-pointer hover:text-accent"
+                    'transition-colors',
+                    isOnGroupDefault
+                      ? 'text-muted-foreground cursor-default'
+                      : 'hover:text-accent cursor-pointer'
                   )}
                   onClick={handleGroupClick}
                   title={isOnGroupDefault ? groupDescriptions[group] : `Jump to ${group}`}
@@ -115,7 +121,7 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
               </BreadcrumbItem>
             </>
           )}
-          
+
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbPage className="text-foreground font-medium" aria-current="page">
@@ -125,5 +131,5 @@ export function PageBreadcrumb({ activeTab, onNavigate, onGoBack, canGoBack, pre
         </BreadcrumbList>
       </Breadcrumb>
     </div>
-  )
+  );
 }

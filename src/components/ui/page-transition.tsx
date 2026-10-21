@@ -81,7 +81,7 @@ const itemVariants = {
 
 export function StaggeredList({ children, className }: StaggeredListProps) {
   const childArray = Children.toArray(children);
-  
+
   return (
     <motion.div
       className={className}
@@ -91,10 +91,9 @@ export function StaggeredList({ children, className }: StaggeredListProps) {
     >
       {childArray.map((child, index) => {
         // Use the child's key if it's a valid element, otherwise use index as fallback
-        const key = isValidElement(child) && child.key !== null 
-          ? child.key 
-          : `staggered-item-${index}`;
-        
+        const key =
+          isValidElement(child) && child.key !== null ? child.key : `staggered-item-${index}`;
+
         return (
           <motion.div key={key} variants={itemVariants}>
             {child}

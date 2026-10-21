@@ -40,9 +40,7 @@ export function ReadmeViewer({
 
     try {
       const content =
-        type === 'model'
-          ? await getModelReadme(resourceId)
-          : await getDatasetReadme(resourceId);
+        type === 'model' ? await getModelReadme(resourceId) : await getDatasetReadme(resourceId);
 
       // Parse markdown to HTML
       const html = await marked.parse(content);
@@ -51,7 +49,7 @@ export function ReadmeViewer({
       setReadme(sanitized);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load README';
-      
+
       // Check if it's a 404 (no README available)
       if (errorMessage.includes('404') || errorMessage.includes('not found')) {
         setError('No README available for this resource.');
@@ -72,7 +70,7 @@ export function ReadmeViewer({
   if (isLoading) {
     return (
       <div className={`space-y-3 ${className}`}>
-        <div className="flex items-center gap-2 text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2">
           <FileText size={16} />
           <span className="text-sm">Loading README...</span>
         </div>
@@ -88,18 +86,13 @@ export function ReadmeViewer({
 
   if (error) {
     return (
-      <div className={`rounded-lg border border-muted bg-muted/50 p-4 ${className}`}>
+      <div className={`border-muted bg-muted/50 rounded-lg border p-4 ${className}`}>
         <div className="flex items-start gap-3">
           <Warning className="text-muted-foreground mt-0.5 shrink-0" size={20} />
           <div className="flex-1">
-            <p className="text-sm text-muted-foreground">{error}</p>
+            <p className="text-muted-foreground text-sm">{error}</p>
             {!error.includes('No README') && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2 gap-2"
-                onClick={fetchReadme}
-              >
+              <Button variant="ghost" size="sm" className="mt-2 gap-2" onClick={fetchReadme}>
                 <ArrowClockwise size={14} />
                 Retry
               </Button>
@@ -116,24 +109,13 @@ export function ReadmeViewer({
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-2 mb-3 text-muted-foreground">
+      <div className="text-muted-foreground mb-3 flex items-center gap-2">
         <FileText size={16} />
         <span className="text-sm font-medium">README</span>
       </div>
-      <ScrollArea style={{ maxHeight }} className="rounded-lg border border-muted">
+      <ScrollArea style={{ maxHeight }} className="border-muted rounded-lg border">
         <div
-          className="prose prose-sm dark:prose-invert max-w-none p-4
-            prose-headings:text-foreground
-            prose-p:text-foreground/90
-            prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-            prose-strong:text-foreground
-            prose-code:text-accent prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded
-            prose-pre:bg-muted prose-pre:border prose-pre:border-muted
-            prose-blockquote:border-l-accent prose-blockquote:text-muted-foreground
-            prose-img:rounded-lg prose-img:max-w-full
-            prose-table:border prose-table:border-muted
-            prose-th:bg-muted prose-th:p-2 prose-th:text-left
-            prose-td:p-2 prose-td:border-t prose-td:border-muted"
+          className="prose prose-sm dark:prose-invert prose-headings:text-foreground prose-p:text-foreground/90 prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-code:text-accent prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-muted prose-pre:border prose-pre:border-muted prose-blockquote:border-l-accent prose-blockquote:text-muted-foreground prose-img:rounded-lg prose-img:max-w-full prose-table:border prose-table:border-muted prose-th:bg-muted prose-th:p-2 prose-th:text-left prose-td:p-2 prose-td:border-t prose-td:border-muted max-w-none p-4"
           dangerouslySetInnerHTML={{ __html: readme }}
         />
       </ScrollArea>

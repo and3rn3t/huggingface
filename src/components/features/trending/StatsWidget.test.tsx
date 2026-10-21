@@ -52,7 +52,7 @@ describe('StatsWidget', () => {
 
     const { rerender } = render(<StatsWidget />);
     rerender(<StatsWidget />);
-    
+
     // Just verify it renders without error
     expect(screen.getByText('3')).toBeInTheDocument();
   });

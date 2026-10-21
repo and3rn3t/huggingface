@@ -40,7 +40,7 @@ export function ParameterControls({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-xs">Temperature</Label>
-                <span className="text-xs text-muted-foreground">{temperature[0]}</span>
+                <span className="text-muted-foreground text-xs">{temperature[0]}</span>
               </div>
               <Slider
                 value={temperature}
@@ -57,7 +57,7 @@ export function ParameterControls({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-xs">Max Tokens</Label>
-                <span className="text-xs text-muted-foreground">{maxTokens[0]}</span>
+                <span className="text-muted-foreground text-xs">{maxTokens[0]}</span>
               </div>
               <Slider
                 value={maxTokens}
@@ -74,7 +74,7 @@ export function ParameterControls({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-xs">Top P</Label>
-                <span className="text-xs text-muted-foreground">{topP[0]}</span>
+                <span className="text-muted-foreground text-xs">{topP[0]}</span>
               </div>
               <Slider
                 value={topP}

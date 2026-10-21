@@ -86,7 +86,7 @@ export function DatasetBrowser() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedDataset, setSelectedDataset] = useState<Dataset | null>(null);
   const [activeTab, setActiveTab] = useState('all');
-  const { isFavorite, toggleFavorite} = useFavorites();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const copyToClipboard = useCopyToClipboard();
 
   // Build query params

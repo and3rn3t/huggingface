@@ -4,12 +4,18 @@
   body {
     font-family: 'Inter', sans-serif;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Space Grotesk', sans-serif;
   }
-  
-  code, pre {
+
+  code,
+  pre {
     font-family: 'JetBrains Mono', monospace;
   }
 }
@@ -31,17 +37,17 @@
     outline: 2px solid var(--ring);
     outline-offset: 2px;
   }
-  
+
   /* Improve focus visibility on buttons and links */
   button:focus-visible,
   a:focus-visible,
-  [role="button"]:focus-visible,
+  [role='button']:focus-visible,
   [tabindex]:focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
     border-radius: var(--radius);
   }
-  
+
   /* Remove default outline when using mouse */
   :focus:not(:focus-visible) {
     outline: none;
@@ -86,8 +92,8 @@
   --destructive: oklch(0.55 0.22 25);
   --destructive-foreground: oklch(0.98 0 0);
 
-  --border: oklch(0.90 0.02 265);
-  --input: oklch(0.90 0.02 265);
+  --border: oklch(0.9 0.02 265);
+  --input: oklch(0.9 0.02 265);
   --ring: oklch(0.55 0.18 195);
 
   --radius: 0.5rem;
@@ -98,10 +104,10 @@
   --background: oklch(0.15 0.03 265);
   --foreground: oklch(0.95 0.01 285);
 
-  --card: oklch(0.20 0.02 265);
+  --card: oklch(0.2 0.02 265);
   --card-foreground: oklch(0.95 0.01 285);
 
-  --popover: oklch(0.20 0.02 265);
+  --popover: oklch(0.2 0.02 265);
   --popover-foreground: oklch(0.95 0.01 285);
 
   --primary: oklch(0.55 0.15 285);
@@ -110,7 +116,7 @@
   --secondary: oklch(0.25 0.02 265);
   --secondary-foreground: oklch(0.95 0.01 285);
 
-  --muted: oklch(0.30 0.02 265);
+  --muted: oklch(0.3 0.02 265);
   --muted-foreground: oklch(0.65 0.05 285);
 
   --accent: oklch(0.75 0.15 195);
@@ -120,7 +126,7 @@
   --destructive-foreground: oklch(0.98 0 0);
 
   --border: oklch(0.35 0.05 265);
-  --input: oklch(0.30 0.05 265);
+  --input: oklch(0.3 0.05 265);
   --ring: oklch(0.75 0.15 195);
 }
 
