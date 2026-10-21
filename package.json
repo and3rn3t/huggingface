@@ -98,7 +98,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
-    "@and3rn3t/eslint-config": "^0.2.0",
+    "@and3rn3t/eslint-config": "^0.3.0",
     "@commitlint/cli": "^21.0.0",
     "@commitlint/config-conventional": "^21.0.0",
     "@playwright/test": "^1.48.0",
@@ -113,7 +113,7 @@
     "@vitejs/plugin-react-swc": "^4.2.2",
     "@vitest/coverage-v8": "^1.0.0",
     "@vitest/ui": "^1.0.0",
-    "eslint": "^9.28.0",
+    "eslint": "^10.13.0",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "prettier": "^3.8.1",
